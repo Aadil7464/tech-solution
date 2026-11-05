@@ -1,0 +1,28 @@
+{
+  "name": "tech-solution-agency",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "build": "npm run build -w frontend",
+    "typecheck": "npm run typecheck -w frontend",
+    "test": "npm run test -w backend && npm run test -w frontend",
+    "bootstrap": "npm run bootstrap -w backend",
+    "seed": "npm run seed -w backend",
+    "db": "npm run db -w backend",
+    "test:browser": "node --env-file=backend/.env scripts/browser-check.mjs",
+    "lint": "eslint frontend/src backend/src scripts",
+    "test:routes": "node scripts/route-check.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.2.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "typescript-eslint": "^8.72.1"
+  }
+}
