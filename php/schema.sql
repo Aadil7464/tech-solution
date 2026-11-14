@@ -1,0 +1,88 @@
+CREATE TABLE IF NOT EXISTS users (
+  id CHAR(24) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(254) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('admin', 'editor') NOT NULL DEFAULT 'editor',
+  session_version INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS content (
+  id CHAR(24) PRIMARY KEY,
+  kind VARCHAR(30) NOT NULL,
+  title VARCHAR(180) NOT NULL,
+  slug VARCHAR(120) NOT NULL,
+  excerpt VARCHAR(500) NOT NULL DEFAULT '',
+  body MEDIUMTEXT NOT NULL,
+  status ENUM('draft', 'scheduled', 'published') NOT NULL DEFAULT 'draft',
+  category VARCHAR(120) NOT NULL DEFAULT '',
+  publish_at DATETIME NULL,
+  display_order INT UNSIGNED NOT NULL DEFAULT 0,
+  approved TINYINT(1) NOT NULL DEFAULT 0,
+  client_consent TINYINT(1) NOT NULL DEFAULT 0,
+  payload JSON NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY content_kind_slug (kind, slug),
+  KEY content_listing (kind, status, publish_at, display_order, created_at),
+  KEY content_category (kind, category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS leads (
+  id CHAR(24) PRIMARY KEY,
+  lead_id VARCHAR(32) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(254) NOT NULL,
+  company VARCHAR(200) NOT NULL DEFAULT '',
+  phone VARCHAR(30) NOT NULL DEFAULT '',
+  budget VARCHAR(30) NOT NULL DEFAULT '',
+  service VARCHAR(120) NOT NULL DEFAULT '',
+  message TEXT NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'New',
+  notification_status ENUM('pending', 'sent', 'failed', 'disabled') NOT NULL DEFAULT 'disabled',
+  notification_error VARCHAR(100) NOT NULL DEFAULT '',
+  notes TEXT NOT NULL,
+  archived_at DATETIME NULL,
+  attribution JSON NOT NULL,
+  payload JSON NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY leads_listing (archived_at, status, created_at),
+  KEY leads_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS settings (
+  setting_key VARCHAR(40) PRIMARY KEY,
+  data JSON NOT NULL,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS activity (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  actor_id CHAR(24) NULL,
+  action VARCHAR(40) NOT NULL,
+  resource VARCHAR(40) NOT NULL,
+  resource_id VARCHAR(64) NOT NULL DEFAULT '',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY activity_recent (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS media (
+  id CHAR(24) PRIMARY KEY,
+  filename VARCHAR(255) NOT NULL,
+  url VARCHAR(1000) NOT NULL,
+  alt VARCHAR(200) NOT NULL DEFAULT '',
+  mime VARCHAR(100) NOT NULL DEFAULT '',
+  size BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  uploaded_by CHAR(24) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY media_recent (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rate_limits (
+  bucket CHAR(64) PRIMARY KEY,
+  window_started_at DATETIME NOT NULL,
+  request_count INT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

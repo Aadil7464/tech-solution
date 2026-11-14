@@ -18,7 +18,7 @@ export async function generateMetadata({
     ? metadataFor(
         data.title + (page > 1 ? ` — Page ${page}` : ""),
         data.excerpt ||
-          `Articles about ${data.title} from Digital Mitra Agency.`,
+          `Articles about ${data.title} from Tech Solutions.`,
         `/blog/category/${slug}` + (page > 1 ? `?page=${page}` : ""),
       )
     : { robots: { index: false } };

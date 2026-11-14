@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { request } from "@/lib/client-api";
+import BrandLogo from "./BrandLogo";
+import { business } from "@/lib/business";
 
 export default function PasswordRecovery({
   mode,
@@ -11,17 +13,29 @@ export default function PasswordRecovery({
   mode: "forgot" | "reset";
 }) {
   const searchParams = useSearchParams();
+  const [ready, setReady] = useState(false);
+  const submitting = useRef(false);
+  useEffect(() => { setReady(true); }, []);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!ready || submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     setMessage("");
     const form = new FormData(event.currentTarget);
     try {
+      if (mode === "reset") {
+        const password = String(form.get("password"));
+        if (password !== String(form.get("confirmPassword")))
+          throw new Error("Passwords do not match.");
+        if (password.length < 8 || new TextEncoder().encode(password).length > 72)
+          throw new Error("Password must contain at least 8 characters and at most 72 UTF-8 bytes.");
+      }
       if (mode === "forgot") {
         const response = await request("/auth/forgot-password", {
           method: "POST",
@@ -46,20 +60,16 @@ export default function PasswordRecovery({
           : "Unable to process your request",
       );
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
 
   return (
     <main id="main" className="login-page">
-      <form onSubmit={submit} className="login-form">
+      <form method="post" action={`/api/v1/auth/${mode === "forgot" ? "forgot-password" : "reset-password"}`} onSubmit={submit} className="login-form" aria-busy={busy}>
         <Link href="/">
-          <img
-            src="/logo/horizontal.svg"
-            width="230"
-            height="45"
-            alt="Digital Mitra Agency"
-          />
+          <BrandLogo className="login-logo" />
         </Link>
         <h1>
           {mode === "forgot"
@@ -71,11 +81,13 @@ export default function PasswordRecovery({
             ? "Enter the email for your registered administrator account."
             : "Create a password with at least 8 characters."}
         </p>
-        {mode === "forgot" ? (
+        {mode === "reset" && message ? null : mode === "forgot" ? (
           <label>
             Email
             <input
               name="email"
+              defaultValue={business.email}
+              disabled={!ready || busy}
               type="email"
               required
               autoComplete="email"
@@ -88,6 +100,7 @@ export default function PasswordRecovery({
               New password
               <input
                 name="password"
+                disabled={!ready || busy}
                 type="password"
                 required
                 minLength={8}
@@ -99,6 +112,7 @@ export default function PasswordRecovery({
               Confirm new password
               <input
                 name="confirmPassword"
+                disabled={!ready || busy}
                 type="password"
                 required
                 minLength={8}
@@ -118,7 +132,9 @@ export default function PasswordRecovery({
             {message}
           </p>
         )}
-        <button className="button" disabled={busy}>
+        {mode === "reset" && message ? (
+          <Link className="button" href="/admin/login">Go to Login</Link>
+        ) : <button type="submit" className="button" disabled={!ready || busy}>
           {busy
             ? mode === "forgot"
               ? "Sending…"
@@ -127,7 +143,7 @@ export default function PasswordRecovery({
               ? "Send reset link"
               : "Reset password"}{" "}
           <span>↗</span>
-        </button>
+        </button>}
         <Link className="back-login" href="/admin/login">
           Back to admin login
         </Link>

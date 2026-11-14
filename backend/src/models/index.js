@@ -8,9 +8,10 @@ export const User = mongoose.model(
   "User",
   new Schema(
     {
-      email: { type: String, unique: true, required: true, lowercase: true },
+      email: { type: String, unique: true, required: true, lowercase: true, trim: true },
       name: String,
       passwordHash: { type: String, select: false },
+      passwordChangedAt: Date,
       passwordResetHash: { type: String, select: false },
       passwordResetExpires: Date,
       pendingEmail: String,
@@ -165,9 +166,9 @@ export const Settings = mongoose.model(
   new Schema(
     {
       key: { type: String, unique: true, default: "site" },
-      title: { type: String, default: "Digital Mitra Agency" },
+      title: { type: String, default: "Tech Solutions" },
       description: String,
-      email: { type: String, default: "digitalmitra@gmail.com" },
+      email: { type: String, default: "digitalmitra786@gmail.com" },
       phone: String,
       whatsapp: String,
       logo: String,

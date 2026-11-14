@@ -5,7 +5,10 @@ import { createApp } from "./app.js";
 const log = pino();
 try {
   const env = parseEnv(process.env);
-  await mongoose.connect(env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
+  await mongoose.connect(env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+    autoIndex: env.NODE_ENV !== "production",
+  });
   const server = createApp(env).listen(env.PORT, () =>
     log.info({ port: env.PORT }, "API listening"),
   );
@@ -17,6 +20,6 @@ try {
       }),
     );
 } catch (err) {
-  log.fatal({ err }, "API failed to start");
+  log.fatal({ errorType: err.name, errorCode: err.code }, "API failed to start");
   process.exit(1);
 }

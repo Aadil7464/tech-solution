@@ -3,9 +3,9 @@ import nodemailer from "nodemailer";
 export function leadMessage(lead, env) {
   return {
     from: env.SMTP_FROM,
-    to: env.LEAD_NOTIFICATION_EMAIL || "digitalmitra@gmail.com",
+    to: env.LEAD_NOTIFICATION_EMAIL || "digitalmitra786@gmail.com",
     replyTo: lead.email,
-    subject: "New website enquiry — Digital Mitra Agency",
+    subject: "New website enquiry — Tech Solutions",
     text: [
       `Name: ${lead.name}`,
       `Email: ${lead.email}`,
@@ -29,6 +29,7 @@ export async function notifyLead(lead, env, transport) {
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTLS: !env.SMTP_SECURE,
       ...(env.SMTP_USER
         ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }
         : {}),
@@ -55,6 +56,7 @@ export async function sendPasswordResetEmail(
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTLS: !env.SMTP_SECURE,
       ...(env.SMTP_USER
         ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }
         : {}),
@@ -69,10 +71,13 @@ export async function sendPasswordResetEmail(
     env.PUBLIC_FRONTEND_URL || env.FRONTEND_URL,
   );
   resetUrl.searchParams.set("token", token);
-  await mailer.sendMail({
-    from: env.SMTP_FROM,
+  const result = await mailer.sendMail({
+    from: { name: "Tech Solutions", address: env.SMTP_FROM },
     to: email,
-    subject: "Reset your Digital Mitra Agency admin password",
+    envelope: { from: env.SMTP_FROM, to: [email] },
+    // Request header-only failure/delay notices when the SMTP server supports DSN.
+    dsn: { ret: "headers", notify: ["failure", "delay"], recipient: email },
+    subject: "Reset Your Tech Solutions Admin Password",
     text: [
       `Hello ${name || "Admin"},`,
       `Use this link within 15 minutes to reset your admin password:`,
@@ -80,6 +85,26 @@ export async function sendPasswordResetEmail(
       "If you did not request this reset, you can ignore this email.",
     ].join("\n\n"),
   });
+  if (!Array.isArray(result?.accepted) || !result.accepted.some((recipient) =>
+    typeof recipient === "string" && recipient.toLowerCase() === email.toLowerCase()))
+    throw new Error("Password reset recipient rejected by SMTP provider");
+  const safe = (value) => {
+    let text = String(value || "");
+    for (const secret of [token, env.SMTP_PASS]) {
+      if (secret) text = text.replaceAll(secret, "[redacted]");
+    }
+    return text.replace(/[\r\n]/g, " ").slice(0, 500);
+  };
+  return {
+    status: "provider_accepted",
+    inboxDelivery: "unconfirmed",
+    messageId: safe(result.messageId) || null,
+    smtpResponse: safe(result.response) || null,
+    envelopeFrom: env.SMTP_FROM,
+    recipient: email,
+    resetPage: resetUrl.origin + resetUrl.pathname,
+    dsnRequested: true,
+  };
 }
 
 export async function sendEmailVerification(
@@ -95,6 +120,7 @@ export async function sendEmailVerification(
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTLS: !env.SMTP_SECURE,
       ...(env.SMTP_USER
         ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }
         : {}),
@@ -112,7 +138,7 @@ export async function sendEmailVerification(
   await mailer.sendMail({
     from: env.SMTP_FROM,
     to: email,
-    subject: "Verify your Digital Mitra Agency admin email",
+    subject: "Verify your Tech Solutions admin email",
     text: [
       `Hello ${name || "Admin"},`,
       `Confirm this email address change within 15 minutes:`,

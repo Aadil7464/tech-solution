@@ -1,8 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Cta from "@/components/Cta";
+import "./shell.css";
 import JsonLd from "@/components/JsonLd";
 import { getSettings, getList } from "@/lib/api";
 import { siteUrl } from "@/lib/seo";
+import { business, telephone } from "@/lib/business";
 export default async function WebsiteLayout({
   children,
 }: {
@@ -12,13 +15,14 @@ export default async function WebsiteLayout({
     getSettings(),
     getList("services", "limit=50"),
   ]);
-  const logo = s.logo || "/logo/digital-mitra-agency.svg";
+  const logo = s.logo || "/logo/tech-solution-agency.svg";
   const whatsappMessage =
-    "Hello Digital Mitra Agency, I would like to know more about your services.";
+    "Hello Tech Solutions, I would like to know more about your services.";
   return (
     <>
       <Header logo={s.logo} services={services.data} />
       <main id="main">{children}</main>
+      <Cta />
       <Footer />
       <JsonLd
         data={{
@@ -27,6 +31,14 @@ export default async function WebsiteLayout({
           name: s.title,
           url: siteUrl,
           logo: new URL(logo, siteUrl).href,
+          contactPoint: business.team.map((member) => ({
+            "@type": "ContactPoint",
+            name: member.name,
+            telephone: telephone(member.phone).slice(4),
+            contactType: "customer service",
+            areaServed: member.location,
+            email: business.email,
+          })),
           ...(s.email ? { email: s.email } : {}),
           ...(s.phone ? { telephone: s.phone } : {}),
           ...(s.address ? { address: s.address } : {}),
@@ -39,7 +51,7 @@ export default async function WebsiteLayout({
           href={`https://wa.me/${s.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Chat with Digital Mitra Agency on WhatsApp"
+          aria-label="Chat with Tech Solutions on WhatsApp"
         >
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <path

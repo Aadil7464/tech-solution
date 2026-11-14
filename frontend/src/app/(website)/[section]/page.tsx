@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getList, getContent } from "@/lib/api";
 import { Cards, Empty } from "@/components/Cards";
-import Cta from "@/components/Cta";
 import { metadataFor, pageMetadata } from "@/lib/seo";
 import { SectionIntro, Faqs } from "@/components/PageContent";
 const sections: Record<
@@ -101,7 +100,6 @@ export default async function Listing({ params, searchParams }: Props) {
           ))}
           <Faqs items={data.faqs || []} />
         </article>
-        <Cta />
         <CustomSchema json={data?.schemaJson} />
       </>
     );
@@ -233,7 +231,6 @@ export default async function Listing({ params, searchParams }: Props) {
         ))}
         {cms?.faqs?.length ? <Faqs items={cms.faqs} /> : null}
       </section>
-      <Cta />
       <CustomSchema json={cms?.schemaJson} />
     </>
   );

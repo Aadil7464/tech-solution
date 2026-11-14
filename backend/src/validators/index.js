@@ -147,7 +147,7 @@ export const contentSchema = z
     author: text(100).default(""),
     category: slug.or(z.literal("")).default(""),
     tags: z.array(text(60)).max(20).default([]),
-    image: url.default(""),
+    image: imageUrl.default(""),
     imageAlt: text(200).default(""),
     status: z.enum(["draft", "scheduled", "published"]).default("draft"),
     publishAt: z.iso.datetime().nullable().optional(),

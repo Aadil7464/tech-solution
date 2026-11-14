@@ -23,3 +23,12 @@ test("bootstrap rejects an admin password shorter than 8 characters", () => {
   });
   assert.equal(result.success, false);
 });
+
+test("bootstrap normalizes the administrator email", () => {
+  const parsed = adminBootstrapSchema.parse({
+    ...validCredentials,
+    ADMIN_EMAIL: "  ADMIN@EXAMPLE.COM  ",
+    ADMIN_PASSWORD: "12345678",
+  });
+  assert.equal(parsed.ADMIN_EMAIL, "admin@example.com");
+});

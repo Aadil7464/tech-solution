@@ -1,31 +1,15 @@
 import Link from "next/link";
-import type { PageSection } from "@/types";
-export default function Cta({ section }: { section?: PageSection }) {
+export default function Cta() {
   return (
-    <section className="cta-section">
-      <video
-        className="cta-video"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/media/team-collaboration.jpg"
-        aria-hidden="true"
-      >
-        <source src="/media/digital-agency.mp4" type="video/mp4" />
-      </video>
-      <div className="cta-overlay" />
-      <div className="container cta-inner">
+    <section className="growth-banner" aria-labelledby="growth-title">
+      <div className="growth-banner-inner">
         <div>
-          <span className="eyebrow">LET’S MAKE SOMETHING MEANINGFUL</span>
-          <h2>Let's Build Your Next Digital Success Story.</h2>
-          <p>
-            {section?.body ||
-              "Tell us what you are building. Let’s find a practical place to start."}
-          </p>
+          <span className="growth-eyebrow">LET&apos;S GROW TOGETHER</span>
+          <h2 id="growth-title">Ready to <span>Grow Your Business Online?</span></h2>
+          <p>Get a free consultation and discover the right digital solution for your business.</p>
         </div>
-        <Link href="/contact" className="button light">
-          {section?.linkLabel || "Get a Free Quote"} <span aria-hidden>↗</span>
+        <Link href="/contact" className="growth-button">
+          Get a Free Quote <span aria-hidden>↗</span>
         </Link>
       </div>
     </section>

@@ -5,6 +5,9 @@
     "frontend",
     "backend"
   ],
+  "overrides": {
+    "minimatch@>=7 <11.0.1": "11.0.1"
+  },
   "scripts": {
     "dev": "concurrently -n web,api \"npm run dev -w frontend\" \"npm run dev -w backend\"",
     "build": "npm run build -w frontend",

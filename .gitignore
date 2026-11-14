@@ -20,6 +20,7 @@ node_modules/
 # =====================================
 .next/
 **/.next/
+**/.next-audit/
 out/
 
 # =====================================
@@ -87,4 +88,6 @@ Thumbs.db
 # OS Files
 # =====================================
 Desktop.ini
-  
+
+.next-shell-build/
+**/.next-shell-build/

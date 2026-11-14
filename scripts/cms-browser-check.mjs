@@ -112,7 +112,7 @@ try {
     .getByRole("heading", { name: "A real section from the CMS" })
     .waitFor();
   await page.goto(base);
-  await page.locator(".services-menu summary").click();
+  await page.locator(".services-menu-trigger").hover();
   await page
     .getByRole("link", { name: "Mobile App Development", exact: true })
     .click();

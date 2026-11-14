@@ -5,7 +5,7 @@ export const generateMetadata = () =>
   pageMetadata(
     "terms-and-conditions",
     "Terms & Conditions",
-    "Website terms for Digital Mitra Agency.",
+    "Website terms for Tech Solutions.",
     "/terms-and-conditions",
     true,
   );
@@ -23,7 +23,7 @@ export default async function Terms() {
           <div dangerouslySetInnerHTML={{ __html: data.content }} />
         ) : (
           <p>
-            Terms are temporarily unavailable. Email digitalmitra@gmail.com with
+            Terms are temporarily unavailable. Email digitalmitra786@gmail.com with
             questions.
           </p>
         )}

@@ -1737,7 +1737,35 @@ td button {
     font-size: 16px;
   }
 }
-/* Digital Mitra logo variants. */
+/* Tech Solutions logo variants. */
+.team-contacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-block: 24px;
+}
+.team-contact {
+  min-width: 0;
+  border-left: 3px solid var(--orange);
+  padding-left: 14px;
+  overflow-wrap: anywhere;
+}
+.team-contact strong,
+.team-contact a {
+  display: block;
+  margin-bottom: 6px;
+}
+.team-contact p {
+  margin: 0;
+  line-height: 1.6;
+}
+.team-contacts.compact {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+@media (max-width: 650px) {
+  .team-contacts { grid-template-columns: minmax(0, 1fr); }
+}
 .brand-logo,
 .brand-logo picture {
   display: block;
@@ -1767,8 +1795,10 @@ td button {
   width: 270px;
   max-width: 100%;
 }
+.login-form .login-logo,
 .login-form > a > img {
   width: 230px;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
 }
@@ -1849,11 +1879,11 @@ td button {
     animation: none !important;
   }
 }
-/* Digital Mitra: navy, electric blue and cyan. */
+/* Tech Solutions: deep navy, blue and vibrant orange. */
 :root {
   --navy: #101828;
   --blue: #2563eb;
-  --orange: #06b6d4;
+  --orange: #f97316;
   --muted: #58677d;
   --line: #e2e8f0;
   --pale: #f8fafc;
@@ -2063,7 +2093,7 @@ summary:focus-visible {
   background: #cbd5e1;
 }
 .window-chrome > i:first-child {
-  background: #06b6d4;
+  background: #f97316;
 }
 .window-chrome > span {
   font: 9px monospace;
@@ -2340,7 +2370,7 @@ summary:focus-visible {
   opacity: 0.7;
 }
 .partner-symbol > span:last-child {
-  color: #06b6d4;
+  color: #f97316;
   opacity: 0.5;
 }
 .art-footer {
@@ -3484,7 +3514,7 @@ summary:focus-visible {
 .api-fallback-notice {
   margin-bottom: 24px;
   padding: 14px 16px;
-  border-left: 3px solid #06b6d4;
+  border-left: 3px solid #f97316;
   background: #f1f7fb;
   color: #475569;
   font-size: 14px;
@@ -3595,7 +3625,7 @@ summary:focus-visible {
   padding-bottom: 12px;
 }
 .purpose-benefits span {
-  color: #06b6d4;
+  color: #f97316;
   font-size: 12px;
 }
 .purpose-benefits h3 {
@@ -3784,7 +3814,7 @@ summary:focus-visible {
 }
 .mitra-hero {
   position: relative;
-  height: 520px;
+  height: auto;
   min-height: 520px;
   overflow: hidden;
 }
@@ -3823,7 +3853,7 @@ summary:focus-visible {
 }
 .footer-logo {
   width: 190px !important;
-  max-height: 52px;
+  max-width: 100%;
 }
 .footer-services a {
   line-height: 1.35;
@@ -3875,7 +3905,7 @@ summary:focus-visible {
   margin: 0;
 }
 .inner-video-hero .eyebrow {
-  color: #06b6d4;
+  color: #f97316;
   margin-bottom: 12px;
 }
 @media (max-width: 800px) {
@@ -3941,14 +3971,15 @@ summary:focus-visible {
   display: block;
   width: 100%;
   max-width: none;
-  height: 520px;
+  height: auto;
   min-height: 520px;
 }
 .mitra-hero .hero-copy {
   position: relative;
   z-index: 2;
   width: min(650px, 58%);
-  height: 520px;
+  height: auto;
+  min-height: 520px;
   padding-block: 76px;
   padding-left: max(48px, calc((100vw - 1216px) / 2));
   box-sizing: border-box;
@@ -3988,7 +4019,7 @@ summary:focus-visible {
 }
 .service-card:hover {
   transform: translateY(-6px);
-  border-color: #06b6d4;
+  border-color: #f97316;
   box-shadow: 0 18px 38px rgba(21, 94, 239, 0.12);
 }
 .service-card .service-icon {

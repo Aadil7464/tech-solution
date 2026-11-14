@@ -4,11 +4,12 @@ import { getContent, getList } from "@/lib/api";
 import { pageMetadata } from "@/lib/seo";
 import { Cards, Empty } from "@/components/Cards";
 import { SectionIntro } from "@/components/PageContent";
-import Cta from "@/components/Cta";
+import TeamContacts from "@/components/TeamContacts";
+import { business } from "@/lib/business";
 export const generateMetadata = () =>
   pageMetadata(
     "home",
-    "Digital Mitra Agency | Development & Digital Marketing",
+    "Tech Solutions | Development & Digital Marketing",
     "Website development, mobile apps, SEO and performance marketing for your next chapter.",
     "/",
   );
@@ -139,7 +140,7 @@ export default async function Home() {
           />
         </div>
         <div className="purpose-copy">
-          <span className="eyebrow">03 / ABOUT DIGITAL MITRA</span>
+          <span className="eyebrow">03 / ABOUT TECH SOLUTIONS</span>
           <h2>
             Work With Purpose.
             <br />
@@ -184,11 +185,11 @@ export default async function Home() {
             <strong>A shared direction.</strong>
           </p>
           <span className="art-footer">
-            DIGITAL MITRA AGENCY <span>↗</span>
+            TECH SOLUTIONS <span>↗</span>
           </span>
         </div>
         <div>
-          <span className="eyebrow">04 / WHY CHOOSE DIGITAL MITRA</span>
+          <span className="eyebrow">04 / WHY CHOOSE TECH SOLUTIONS</span>
           <SectionIntro
             section={section("why")}
             fallback="Good partnerships start with clarity."
@@ -284,7 +285,11 @@ export default async function Home() {
           </div>
         </section>
       ) : null}
-      <Cta section={section("cta")} />
+      <section className="container section">
+        <h2>Talk to our team</h2>
+        <p><a href={`mailto:${business.email}`}>{business.email}</a></p>
+        <TeamContacts />
+      </section>
       <CustomSchema json={page?.schemaJson} />
     </>
   );

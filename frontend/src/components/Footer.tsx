@@ -1,105 +1,27 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import BrandLogo from "./BrandLogo";
 import { getSettings, getList } from "@/lib/api";
+import { business, telephone } from "@/lib/business";
 export default async function Footer() {
-  const s = await getSettings();
-  const services = await getList("services", "limit=100");
+  const [settings, services] = await Promise.all([getSettings(), getList("services", "limit=100")]);
   const featured = [
-    "website-development",
-    "seo-services",
-    "google-ads",
-    "social-media-marketing",
-    "mobile-app-development",
-    "graphic-design",
-  ];
-  const featuredServices = featured
-    .map((slug) => services.data.find((service) => service.slug === slug))
-    .filter(Boolean);
-  return (
-    <footer className="footer">
-      <div className="container">
-        {s.email && (
-          <div className="footer-topline">
-            <span>LET’S BUILD YOUR NEXT CHAPTER.</span>
-            <a href={"mailto:" + s.email}>Say hello ↗</a>
-          </div>
-        )}
-        <div className="footer-main">
-          <div>
-            <Link className="footer-brand" href="/">
-              <BrandLogo dark src={s.logoDark} className="footer-logo" />
-            </Link>
-            <p>
-              {s.footerText ||
-                "Your partner in digital growth. Clear thinking. Purposeful work."}
-            </p>
-          </div>
-          <div>
-            <h3>Quick links</h3>
-            <Link href="/">Home</Link>
-            <Link href="/about">About us</Link>
-            <Link href="/services">Services</Link>
-            <Link href="/portfolio">Portfolio</Link>
-            <Link href="/blog">Blog</Link>
-            <Link href="/contact">Contact</Link>
-          </div>
-          <div className="footer-services">
-            <h3>Our services</h3>
-            {featuredServices.map((service) => (
-              <Link key={service!._id} href={"/services/" + service!.slug}>
-                {service!.title}
-              </Link>
-            ))}
-            <Link href="/services">View all services ↗</Link>
-          </div>
-          <div>
-            <h3>Contact us</h3>
-            {s.email && <a href={"mailto:" + s.email}>{s.email}</a>}
-            {s.phone && (
-              <a href={"tel:" + s.phone.replace(/[^+\d]/g, "")}>{s.phone}</a>
-            )}
-            {s.whatsapp && (
-              <a
-                href={"https://wa.me/" + s.whatsapp.replace(/\D/g, "")}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp ↗
-              </a>
-            )}
-            {s.address && <span>{s.address}</span>}
-            {s.socialLinks
-              ?.filter((url) => {
-                try {
-                  const parsed = new URL(url);
-                  return ["http:", "https:"].includes(parsed.protocol);
-                } catch {
-                  return false;
-                }
-              })
-              .map((url) => (
-                <a
-                  key={url}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {new URL(url).hostname.replace("www.", "")} ↗
-                </a>
-              ))}
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>
-            © {new Date().getFullYear()} {s.title}. All rights reserved.
-          </span>
-          <div>
-            <Link href="/privacy-policy">Privacy policy</Link>
-            <Link href="/terms-and-conditions">Terms & conditions</Link>
-          </div>
-          <a href="#top">Back to top ↑</a>
-        </div>
+    ["website-development", "Website Development"], ["seo-services", "Search Engine Optimization"],
+    ["google-ads", "Google Ads Management"], ["social-media-marketing", "Social Media Marketing"],
+    ["mobile-app-development", "Mobile App Development"], ["graphic-design", "Graphic Design"],
+  ].filter(([slug]) => services.data.some(service => service.slug === slug));
+  return <footer className="agency-footer"><div className="container">
+    <div className="agency-footer-grid">
+      <div><Link href="/" aria-label="Tech Solutions homepage"><BrandLogo src={settings.logo} className="agency-footer-logo" /></Link>
+        <p>We help brands grow online with result-driven digital marketing, website development and custom digital solutions.</p></div>
+      <div><h3>Quick Links</h3><nav aria-label="Footer quick links">{[["/", "Home"], ["/about", "About Us"], ["/services", "Services"], ["/portfolio", "Portfolio"], ["/blog", "Blog"], ["/contact", "Contact"]].map(([href, label]) => <Link href={href} key={href}>{label}</Link>)}</nav></div>
+      <div><h3>Our Services</h3><nav aria-label="Footer services">{featured.map(([slug, label]) => <Link href={"/services/" + slug} key={slug}><span className="footer-icon" aria-hidden>↗</span>{label}</Link>)}<Link href="/services" className="footer-all-services">View All Services <span aria-hidden>↗</span></Link></nav></div>
+      <div><h3>Contact Us</h3>
+        <a className="footer-contact-line" href={"mailto:" + business.email}><span className="footer-icon" aria-hidden>✉</span>{business.email}</a>
+        <div className="footer-people">{business.team.map(member => <a className="footer-contact-line" href={telephone(member.phone)} key={member.name}><svg className="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden><path d="m5 3 4 4-2 3c2 4 3 5 7 7l3-2 4 4c-2 5-7 3-12-2S2 5 5 3Z" /></svg><span>{member.name}<strong>{member.phone}</strong></span></a>)}</div>
+        <div className="footer-contact-line"><span className="footer-icon" aria-hidden>⌖</span><span>Noida, Uttar Pradesh<br />Delhi<br />Bengaluru, Karnataka</span></div>
       </div>
-    </footer>
-  );
+    </div>
+    <div className="agency-footer-bottom"><span>© {new Date().getFullYear()} Tech Solutions. All rights reserved.</span><nav aria-label="Legal links"><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms-and-conditions">Terms &amp; Conditions</Link><a href="/sitemap.xml">Sitemap</a></nav></div>
+  </div></footer>;
 }
+

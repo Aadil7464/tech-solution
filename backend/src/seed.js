@@ -113,7 +113,7 @@ export async function seed() {
             )}</ul><h2>A clear starting point</h2><p>Tell us about your goals, current setup and constraints. We will use that context to discuss a scope, timeline and measurement plan before work begins.</p>`,
           status: "published",
           order: offerings.findIndex((v) => v[1] === slug),
-          seoTitle: title + " | Digital Mitra Agency",
+          seoTitle: title + " | Tech Solutions",
           metaDescription: excerpt,
           cta: "Discuss your project",
         },
@@ -177,7 +177,7 @@ export async function seed() {
           slug,
           excerpt,
           content,
-          author: "Digital Mitra Agency",
+          author: "Tech Solutions",
           category: "strategy",
           status: "published",
           seoTitle: title,
@@ -190,10 +190,10 @@ export async function seed() {
     { key: "site" },
     {
       $setOnInsert: {
-        title: "Digital Mitra Agency",
+        title: "Tech Solutions",
         description:
           "Your partner in digital growth. Search, paid media, content and websites with a clear purpose.",
-        email: "digitalmitra@gmail.com",
+        email: "digitalmitra786@gmail.com",
         phone: "",
         address: "",
         socialLinks: [],

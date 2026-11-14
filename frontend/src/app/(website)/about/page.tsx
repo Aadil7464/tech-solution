@@ -1,19 +1,19 @@
 import CustomSchema from "@/components/CustomSchema";
 import { getContent } from "@/lib/api";
 import { pageMetadata } from "@/lib/seo";
-import Cta from "@/components/Cta";
+import TeamContacts from "@/components/TeamContacts";
 import { SectionIntro, Faqs } from "@/components/PageContent";
 export const generateMetadata = () =>
   pageMetadata(
     "about",
-    "About Digital Mitra Agency",
+    "About Tech Solutions",
     "A practical partner for website development, mobile applications, SEO and digital marketing.",
     "/about",
   );
 export default async function About() {
   const { data, unavailable } = await getContent("pages", "about");
   const fallback =
-    "<h2>Your digital partner, from idea to impact.</h2><p>Digital Mitra Agency connects strategy, technology, design and marketing to create practical digital experiences. We begin by understanding the business goal, the audience and the constraints that shape the work.</p><h2>Mission and vision</h2><p>Our mission is to make capable digital work understandable and useful for growing businesses. Our vision is a lasting partnership built on clear decisions, responsible delivery and measurable progress.</p><h2>What we do</h2><p>We plan and build websites, applications and e-commerce experiences. We also support search, paid campaigns, social content and brand communication through connected digital programmes.</p>";
+    "<h2>Your digital partner, from idea to impact.</h2><p>Tech Solutions connects strategy, technology, design and marketing to create practical digital experiences. We begin by understanding the business goal, the audience and the constraints that shape the work.</p><h2>Mission and vision</h2><p>Our mission is to make capable digital work understandable and useful for growing businesses. Our vision is a lasting partnership built on clear decisions, responsible delivery and measurable progress.</p><h2>What we do</h2><p>We plan and build websites, applications and e-commerce experiences. We also support search, paid campaigns, social content and brand communication through connected digital programmes.</p>";
   return (
     <>
       <section className="page-hero inner-video-hero">
@@ -29,7 +29,7 @@ export default async function About() {
           <source src="/media/digital-agency.mp4" type="video/mp4" />
         </video>
         <div className="hero-content">
-          <span className="eyebrow">ABOUT DIGITAL MITRA AGENCY</span>
+          <span className="eyebrow">ABOUT TECH SOLUTIONS</span>
           <h1>
             {data?.title ||
               "Technology with purpose. A partnership with perspective."}
@@ -100,7 +100,10 @@ export default async function About() {
         ))}
         {data?.faqs?.length ? <Faqs items={data.faqs} /> : null}
       </article>
-      <Cta />
+      <section className="container section">
+        <h2>Meet the team</h2>
+        <TeamContacts />
+      </section>
       <CustomSchema json={data?.schemaJson} />
     </>
   );

@@ -1,13 +1,14 @@
 import CustomSchema from "@/components/CustomSchema";
 import { getList, getSettings, getContent } from "@/lib/api";
 import ContactForm from "@/components/ContactForm";
+import TeamContacts from "@/components/TeamContacts";
 import { pageMetadata } from "@/lib/seo";
 import { SectionIntro, Faqs } from "@/components/PageContent";
 export const generateMetadata = () =>
   pageMetadata(
     "contact",
-    "Contact Digital Mitra Agency",
-    "Discuss your website, mobile application or marketing project. Email digitalmitra@gmail.com or send an enquiry.",
+    "Contact Tech Solutions",
+    "Discuss your website, mobile application or marketing project. Email digitalmitra786@gmail.com or send an enquiry.",
     "/contact",
   );
 export default async function Contact() {
@@ -44,6 +45,7 @@ export default async function Contact() {
           <div className="contact-details">
             <h2>Get in touch</h2>
             {s.email && <a href={"mailto:" + s.email}>{s.email}</a>}
+            <TeamContacts compact />
             {s.phone && (
               <a href={"tel:" + s.phone.replace(/[^+\d]/g, "")}>{s.phone}</a>
             )}
@@ -60,7 +62,7 @@ export default async function Contact() {
             )}
           </div>
           <p className="small-copy">
-            Your enquiry goes directly to the configured business endpoint.
+            Our team will review your project enquiry and get in touch.
             <br />
             No mailing list sign-up is required.
           </p>

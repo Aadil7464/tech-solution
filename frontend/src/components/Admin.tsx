@@ -1,8 +1,9 @@
 "use client";
 import ContentBlocksEditor from "./ContentBlocksEditor";
 import AccountSettings from "./AccountSettings";
+import LoginSuccessNotice from "./LoginSuccessNotice";
 import Link from "next/link";
-import { Fragment, useState, useEffect, useCallback } from "react";
+import { Fragment, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { request } from "@/lib/client-api";
 type Row = Record<string, any>;
@@ -97,13 +98,19 @@ export default function Admin({
   const [dateTo, setDateTo] = useState(initialFilters.to || "");
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState("");
+  const loadController = useRef<AbortController | null>(null);
   const load = useCallback(async () => {
+    loadController.current?.abort();
+    const controller = new AbortController();
+    loadController.current = controller;
     setLoading(true);
     setError("");
     try {
       const result = await request(
-        `/admin/${kind}?page=${page}&limit=12${kind === "leads" ? `&search=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}&service=${encodeURIComponent(serviceFilter)}&budget=${encodeURIComponent(budgetFilter)}&oldDays=${encodeURIComponent(oldDays)}&from=${encodeURIComponent(dateFrom)}&to=${encodeURIComponent(dateTo)}` : ""}`,
+        `/admin/${kind}?page=${page}&limit=${kind === "activity" ? 10 : 12}&search=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}${kind === "leads" ? `&service=${encodeURIComponent(serviceFilter)}&budget=${encodeURIComponent(budgetFilter)}&oldDays=${encodeURIComponent(oldDays)}&from=${encodeURIComponent(dateFrom)}&to=${encodeURIComponent(dateTo)}` : ""}`,
+        { signal: controller.signal },
       );
+      if (controller.signal.aborted) return;
       if (["dashboard", "settings"].includes(kind)) setData(result.data);
       else {
         setRows(result.data);
@@ -112,9 +119,9 @@ export default function Admin({
         );
       }
     } catch (e) {
-      setError(message(e));
+      if (!controller.signal.aborted) setError(message(e));
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [
     kind,
@@ -160,6 +167,7 @@ export default function Admin({
   ]);
   useEffect(() => {
     void load();
+    return () => loadController.current?.abort();
   }, [load]);
   function message(e: unknown) {
     return e instanceof Error
@@ -301,7 +309,7 @@ export default function Admin({
         <Link className="footer-brand" href="/">
           <img src="/logo/monogram.svg" width="35" height="35" alt="" />
           <span>
-            DIGITAL MITRA
+            TECH SOLUTIONS
             <br />
             <small>ADMINISTRATION</small>
           </span>
@@ -346,6 +354,7 @@ export default function Admin({
             View website ↗
           </Link>
         </div>
+        <LoginSuccessNotice />
         {error && (
           <div role="alert" className="status-message error">
             {error} <button onClick={load}>Retry</button>
@@ -464,7 +473,8 @@ export default function Admin({
                         <p>Latest administration updates</p>
                       </div>
                     </div>
-                    <ActivityTable rows={data.activity || []} />
+                    <ActivityTable rows={(data.activity || []).slice(0, 5)} />
+                    <Link href="/admin/activity">View All Activity</Link>
                   </div>
                 </div>
               </>
@@ -763,9 +773,7 @@ export default function Admin({
                               />
                             </label>
                             <div className="form-two">
-                              {field("image", "Image URL from Media", {
-                                type: "url",
-                              })}
+                              {field("image", "Image URL from Media")}
                               {field("imageAlt", "Descriptive image alt text", {
                                 max: 200,
                               })}
@@ -1518,8 +1526,8 @@ function ActivityTable({ rows }: { rows: Row[] }) {
         <tbody>
           {rows.map((r) => (
             <tr key={r._id}>
-              <td>{r.action}</td>
-              <td>{r.resource}</td>
+              <td>{r.action === "login" ? "Admin Login" : r.action}</td>
+              <td>{r.resource === "auth" ? "Authentication" : r.resource}</td>
               <td>{r.actor?.name || "Administrator"}</td>
               <td>{new Date(r.createdAt).toLocaleString()}</td>
             </tr>

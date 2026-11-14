@@ -1,9 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { request } from "@/lib/client-api";
 
 export default function AccountSettings({ email }: { email: string }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setReady(true); }, []);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -11,6 +13,8 @@ export default function AccountSettings({ email }: { email: string }) {
   return (
     <div className="account-settings">
       <form
+        method="post"
+        action="/api/v1/admin/account/email"
         className="admin-panel"
         onSubmit={async (event) => {
           event.preventDefault();
@@ -47,6 +51,7 @@ export default function AccountSettings({ email }: { email: string }) {
           <input
             name="email"
             type="email"
+            disabled={!ready || busy}
             required
             maxLength={254}
             autoComplete="email"
@@ -57,15 +62,18 @@ export default function AccountSettings({ email }: { email: string }) {
           <input
             name="password"
             type="password"
+            disabled={!ready || busy}
             required
             autoComplete="current-password"
           />
         </label>
-        <button className="button" disabled={busy}>
+        <button className="button" disabled={!ready || busy}>
           {busy ? "Sending…" : "Send verification link"}
         </button>
       </form>
       <form
+        method="post"
+        action="/api/v1/admin/account/password"
         className="admin-panel"
         onSubmit={async (event) => {
           event.preventDefault();
@@ -100,6 +108,7 @@ export default function AccountSettings({ email }: { email: string }) {
           Current password
           <input
             name="currentPassword"
+            disabled={!ready || busy}
             type="password"
             required
             autoComplete="current-password"
@@ -109,6 +118,7 @@ export default function AccountSettings({ email }: { email: string }) {
           New password
           <input
             name="newPassword"
+            disabled={!ready || busy}
             type="password"
             required
             minLength={8}
@@ -120,6 +130,7 @@ export default function AccountSettings({ email }: { email: string }) {
           Confirm new password
           <input
             name="confirmPassword"
+            disabled={!ready || busy}
             type="password"
             required
             minLength={8}
@@ -127,7 +138,7 @@ export default function AccountSettings({ email }: { email: string }) {
             autoComplete="new-password"
           />
         </label>
-        <button className="button" disabled={busy}>
+        <button className="button" disabled={!ready || busy}>
           {busy ? "Changing…" : "Change password"}
         </button>
       </form>

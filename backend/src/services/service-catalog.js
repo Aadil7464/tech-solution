@@ -221,6 +221,24 @@ const entries = [
     "Can you follow our brand guidelines?",
     "Yes. We review existing colours, typography, usage rules and licensed assets before designing.",
   ],
+  [
+    "Google Business Profile (GMB)", "google-business-profile", "marketing",
+    "Make your local business easier to find.",
+    "Accurate Google Business Profile setup and improvements for eligible businesses.",
+    "Eligibility review|Profile information|Service and photo guidance|Ongoing profile review",
+    "We review your actual service area and business details, improve eligible profiles and document ownership and maintenance responsibilities.",
+    "Can every business have a profile?", "Eligibility depends on Google's business profile rules and how you serve customers.",
+    "Do you guarantee map rankings?", "No. We improve profile accuracy and usefulness without promising a position.",
+  ],
+  [
+    "Branding", "branding", "creative",
+    "A consistent identity for your next chapter.",
+    "Brand positioning, visual identity and practical guidelines for consistent communication.",
+    "Brand discovery|Identity direction|Logo usage guidance|Brand guidelines",
+    "We build on your business goals and existing assets to define a clear identity that works across websites, campaigns and everyday materials.",
+    "Can you work with an existing logo?", "Yes. We review and preserve usable assets before recommending changes.",
+    "What files are included?", "The agreed scope lists source files, export formats, licensing and usage guidance.",
+  ],
 ];
 
 export const serviceCatalog = entries.map(

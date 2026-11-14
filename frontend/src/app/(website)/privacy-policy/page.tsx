@@ -5,7 +5,7 @@ export const generateMetadata = () =>
   pageMetadata(
     "privacy-policy",
     "Privacy Policy",
-    "How Digital Mitra Agency handles enquiries and website data.",
+    "How Tech Solutions handles enquiries and website data.",
     "/privacy-policy",
     true,
   );
@@ -24,7 +24,7 @@ export default async function Privacy() {
         ) : (
           <p>
             Policy content is temporarily unavailable. Email
-            digitalmitra@gmail.com for privacy enquiries.
+            digitalmitra786@gmail.com for privacy enquiries.
           </p>
         )}
       </article>

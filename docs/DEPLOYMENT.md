@@ -1,5 +1,7 @@
 # Deploying the existing frontend and backend
 
+Current direction (5 November 2026): hosting, domain, database provider and ingress are not selected. Follow [HOSTING_INDEPENDENT_DEPLOYMENT.md](HOSTING_INDEPENDENT_DEPLOYMENT.md) as the primary guide. Provider-specific examples below are optional references, not an approved production topology. Proxy trust remains disabled unless explicit verified TRUSTED_PROXY_CIDRS values are supplied. Production startup no longer creates indexes automatically.
+
 This project remains Next.js + Express + MongoDB. The existing authenticated MongoDB CMS supplies persistent pages, services, blog posts, settings and enquiries. Sanity is not needed alongside this CMS. Existing filesystem image storage is suitable only when `UPLOAD_DIR` is mounted on durable storage; ephemeral/serverless filesystems are not supported by this storage configuration.
 
 ## Prepare a host
@@ -14,7 +16,11 @@ Backend configuration:
 - `FRONTEND_URL` must equal the exact public website origin, without a trailing slash. Writes from other origins are rejected.
 - `PUBLIC_API_URL` is the public HTTPS base origin used for uploaded image URLs. Configure ingress for `/uploads` accordingly.
 - `UPLOAD_DIR` points to durable storage relative to the backend process working directory, or use an absolute path.
-- Mail uses `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` and `LEAD_NOTIFICATION_EMAIL`. The default recipient is `digitalmitra@gmail.com`. Port 465 normally uses `SMTP_SECURE=true`; for STARTTLS on 587 use `false`. Supply authenticated sender details accepted by your provider. Do not place an account password in client-side code.
+- Mail uses `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` and `LEAD_NOTIFICATION_EMAIL`. The default recipient is `digitalmitra786@gmail.com`. Port 465 normally uses `SMTP_SECURE=true`; for STARTTLS on 587 use `false`. Supply authenticated sender details accepted by your provider. Do not place an account password in client-side code.
+- Administrator recovery requires a working `SMTP_HOST` and `SMTP_FROM`, plus `SMTP_PASS` when `SMTP_USER` is set. Missing configuration or failed delivery returns HTTP 503 rather than claiming a reset email was sent. Reset mail uses the sender name Digital Mitra Agency and subject Reset Your Digital Mitra Agency Admin Password.
+- Set `PUBLIC_FRONTEND_URL` to the externally reachable HTTPS website URL in production. Recovery links expire after 15 minutes. Never use a private LAN address for production email links.
+- For LAN development, start Next with `--hostname 0.0.0.0`, set frontend `DEV_ALLOWED_ORIGINS` to the exact LAN hostname/IP (no scheme or port), and add the exact frontend URL to backend `FRONTEND_URLS`. These are separate HMR and API origin controls. Preserve production origin restrictions, CSRF and secure cookies.
+- Run `node scripts/final-audit.mjs` for isolated MongoDB, browser authentication/recovery, desktop/mobile, LAN HMR, CMS, route/SEO and production performance verification. It uses ports 3100, 3101 and 4100 and restores Next-generated TypeScript configuration after teardown.
 
 Frontend configuration:
 
@@ -34,7 +40,7 @@ npm test
 npm run build
 ```
 
-Back up the database before a production content import. With the intended database configured, `npm run seed` adds missing pages, 17 service offerings, original articles and a category. It retains existing editorial changes and supplies missing FAQ/category/section-item fields. It does not create fake clients or testimonials. Existing installations retain three legacy service records in Admin; their public routes redirect to the current equivalents.
+Back up the database before any approved production content migration. Do not automatically run seed on production: it adds missing pages, 19 service offerings, original articles and a category, supplies missing FAQ/category/section-item fields, and can change legacy publication states. Review and approve its exact delta first. Existing installations retain three legacy service records in Admin; their public routes redirect to the current equivalents.
 
 Provision an administrator with explicit credentials using `npm run bootstrap`. Remove bootstrap password variables after use. In a process manager, run:
 

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getContent, getList } from "@/lib/api";
 import { metadataFor, siteUrl } from "@/lib/seo";
-import Cta from "@/components/Cta";
 import JsonLd from "@/components/JsonLd";
 import { Faqs, SectionIntro } from "@/components/PageContent";
 import { Cards } from "@/components/Cards";
@@ -54,7 +53,8 @@ export default async function Detail({
   const { section, slug } = await params;
   if (!kinds[section]) notFound();
   const { data, unavailable } = await getContent(kinds[section], slug);
-  if (unavailable) throw new Error("Content is temporarily unavailable");
+  if (unavailable && !data)
+    throw new Error("Content is temporarily unavailable");
   if (!data) notFound();
   const related =
     section === "services"
@@ -116,6 +116,12 @@ export default async function Detail({
         }
       >
         <article id="service-content" className="prose article-content">
+          {unavailable && section === "services" && (
+            <p className="api-fallback-notice" role="status">
+              Live service details are temporarily unavailable. Showing the
+              verified service information below.
+            </p>
+          )}
           {data.image && (
             <img
               className="featured-image"
@@ -198,11 +204,11 @@ export default async function Detail({
                 dateModified: data.updatedAt,
                 author: {
                   "@type": "Organization",
-                  name: data.author || "Digital Mitra Agency",
+                  name: data.author || "Tech Solutions",
                 },
                 publisher: {
                   "@type": "Organization",
-                  name: "Digital Mitra Agency",
+                  name: "Tech Solutions",
                 },
                 mainEntityOfPage: url,
                 ...(data.image ? { image: data.image } : {}),
@@ -216,7 +222,7 @@ export default async function Detail({
                   serviceType: data.title,
                   provider: {
                     "@type": "Organization",
-                    name: "Digital Mitra Agency",
+                    name: "Tech Solutions",
                     url: siteUrl,
                   },
                 }
@@ -244,7 +250,6 @@ export default async function Detail({
           ],
         }}
       />
-      <Cta />
       <CustomSchema json={data?.schemaJson} />
     </>
   );

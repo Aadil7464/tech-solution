@@ -117,6 +117,10 @@ export function apiRouter(env, passwordResetTransport) {
     csrf,
     validate(forgotPasswordSchema),
     async (req, res) => {
+      if (!env.SMTP_HOST || !env.SMTP_FROM || (env.SMTP_USER && !env.SMTP_PASS))
+        return res.status(503).json({
+          error: { message: "Password reset email is unavailable. Please contact the administrator to configure SMTP." },
+        });
       const generic = {
         data: {
           message:
@@ -127,10 +131,11 @@ export function apiRouter(env, passwordResetTransport) {
         email: req.valid.email.toLowerCase(),
         role: "admin",
       });
+      let delivery;
       if (user) {
         const token = crypto.randomBytes(32).toString("hex");
         const hash = crypto.createHash("sha256").update(token).digest("hex");
-        await User.updateOne(
+        const stored = await User.updateOne(
           { _id: user._id },
           {
             $set: {
@@ -139,24 +144,40 @@ export function apiRouter(env, passwordResetTransport) {
             },
           },
         );
+        if (stored.modifiedCount !== 1)
+          throw new HttpError(409, "Unable to create a password reset link. Please try again.");
         if (env.SMTP_HOST && env.SMTP_FROM) {
           try {
-            await sendPasswordResetEmail(
+            delivery = await sendPasswordResetEmail(
               user.email,
               user.name,
               token,
               env,
               passwordResetTransport,
             );
+            req.log.info({ delivery }, "Password reset accepted by SMTP provider; inbox delivery unconfirmed");
           } catch (error) {
+            await User.updateOne(
+              { _id: user._id, passwordResetHash: hash },
+              { $unset: { passwordResetHash: 1, passwordResetExpires: 1 } },
+            );
             req.log.warn(
               { errorType: error?.constructor?.name },
               "Admin password reset email delivery failed",
             );
+            return res.status(503).json({
+              error: { message: "Password reset email could not be sent. Please try again later or contact the administrator." },
+            });
           }
         }
       }
-      res.json(generic);
+      res.json(user ? {
+        data: {
+          message: "Password reset link sent successfully! Please check your inbox and spam folder.",
+          deliveryStatus: "provider_accepted",
+          deliveryReference: delivery?.messageId || null,
+        },
+      } : generic);
     },
   );
   r.post(
@@ -173,9 +194,11 @@ export function apiRouter(env, passwordResetTransport) {
         role: "admin",
         passwordResetHash: hash,
         passwordResetExpires: { $gt: new Date() },
-      }).select("+passwordResetHash");
+      }).select("+passwordResetHash +passwordHash");
       if (!user)
         throw new HttpError(400, "This reset link is invalid or has expired");
+      if (await bcrypt.compare(req.valid.password, user.passwordHash || ""))
+        throw new HttpError(422, "New password must be different from the current password");
       const passwordHash = await bcrypt.hash(req.valid.password, 12);
       const updated = await User.updateOne(
         {
@@ -184,7 +207,7 @@ export function apiRouter(env, passwordResetTransport) {
           passwordResetExpires: { $gt: new Date() },
         },
         {
-          $set: { passwordHash },
+          $set: { passwordHash, passwordChangedAt: new Date() },
           $unset: { passwordResetHash: 1, passwordResetExpires: 1 },
           $inc: { sessionVersion: 1 },
         },
@@ -192,7 +215,7 @@ export function apiRouter(env, passwordResetTransport) {
       if (updated.modifiedCount !== 1)
         throw new HttpError(400, "This reset link is invalid or has expired");
       res.clearCookie("session", options);
-      res.json({ data: { message: "Password reset successfully." } });
+      res.json({ data: { message: "Password changed successfully! You can now log in using your new password." } });
     },
   );
   r.post(
@@ -321,8 +344,8 @@ export function apiRouter(env, passwordResetTransport) {
       .lean();
     res.json({
       data: data || {
-        title: "Digital Mitra Agency",
-        email: "digitalmitra@gmail.com",
+        title: "Tech Solutions",
+        email: "digitalmitra786@gmail.com",
       },
     });
   });
@@ -420,7 +443,7 @@ export function apiRouter(env, passwordResetTransport) {
       const updated = await User.updateOne(
         { _id: user._id, role: "admin", passwordHash: user.passwordHash },
         {
-          $set: { passwordHash: await bcrypt.hash(req.valid.newPassword, 12) },
+          $set: { passwordHash: await bcrypt.hash(req.valid.newPassword, 12), passwordChangedAt: new Date() },
           $inc: { sessionVersion: 1 },
         },
       );
@@ -491,8 +514,8 @@ export function apiRouter(env, passwordResetTransport) {
       Service.countDocuments(visible("services")),
       Page.countDocuments(visible("pages")),
       Activity.find()
-        .sort({ createdAt: -1 })
-        .limit(15)
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(5)
         .populate("actor", "name")
         .lean(),
       Lead.aggregate([
@@ -838,8 +861,8 @@ export function apiRouter(env, passwordResetTransport) {
   r.get("/admin/settings", admin, async (req, res) =>
     res.json({
       data: (await Settings.findOne({ key: "site" }).lean()) || {
-        title: "Digital Mitra Agency",
-        email: "digitalmitra@gmail.com",
+        title: "Tech Solutions",
+        email: "digitalmitra786@gmail.com",
       },
     }),
   );
@@ -858,10 +881,11 @@ export function apiRouter(env, passwordResetTransport) {
     },
   );
   r.get("/admin/activity", admin, async (req, res) => {
-    const { page, limit } = pageOptions(req.query);
+    const { page } = pageOptions(req.query);
+    const limit = 10;
     const [data, total] = await Promise.all([
       Activity.find()
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1, _id: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate("actor", "name")

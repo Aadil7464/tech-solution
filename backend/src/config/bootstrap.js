@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const adminBootstrapSchema = z.object({
-  ADMIN_EMAIL: z.email(),
+  ADMIN_EMAIL: z.string().trim().toLowerCase().pipe(z.email()),
   ADMIN_ROLE: z.enum(["admin", "editor"]).default("admin"),
   ADMIN_PASSWORD: z
     .string()

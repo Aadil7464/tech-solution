@@ -30,12 +30,16 @@ try {
     await page.goto(process.env.TEST_BASE_URL || "http://localhost:3000", {
       waitUntil: "networkidle",
     });
-    await page.locator("summary").first().click();
+    await page.getByRole("link", { name: "Go to homepage" }).focus();
+    await page.keyboard.press("Tab");
     await page.waitForTimeout(250);
     const result = await page.evaluate(() => ({
       ...window.__localVitals,
       ttfb: performance.getEntriesByType("navigation")[0].responseStart,
       fcp: performance.getEntriesByName("first-contentful-paint")[0]?.startTime,
+      scriptBytes: performance.getEntriesByType("resource").filter((entry) => entry.initiatorType === "script").reduce((sum, entry) => sum + entry.encodedBodySize, 0),
+      styleBytes: performance.getEntriesByType("resource").filter((entry) => entry.name.includes(".css")).reduce((sum, entry) => sum + entry.encodedBodySize, 0),
+      resourceCount: performance.getEntriesByType("resource").length,
     }));
     console.log(
       JSON.stringify({
@@ -45,6 +49,9 @@ try {
         sampleInteractionMs: result.interaction || "<16",
         ttfbMs: Math.round(result.ttfb),
         fcpMs: Math.round(result.fcp),
+        javascriptKiB: Math.round(result.scriptBytes / 1024),
+        cssKiB: Math.round(result.styleBytes / 1024),
+        resources: result.resourceCount,
       }),
     );
     if (result.lcp > 2500 || result.cls > 0.1)

@@ -11,34 +11,42 @@ export const metadataFor = (
   canonical?: string,
   ogTitle?: string,
   ogImage?: string,
-): Metadata => ({
-  title: title.includes("Digital Mitra Agency") ? { absolute: title } : title,
-  description,
-  alternates: { canonical: canonical || siteUrl + path },
-  robots: noindex
-    ? { index: false, follow: false }
-    : { index: true, follow: true },
-  openGraph: {
-    title: ogTitle || title,
-    description,
-    url: canonical || siteUrl + path,
-    siteName: "Digital Mitra Agency",
-    type: "website",
-    images: [
-      {
-        url: ogImage || siteUrl + "/opengraph-image",
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: ogTitle || title,
-    description,
-    images: [ogImage || siteUrl + "/opengraph-image"],
-  },
-});
+): Metadata => {
+  const rebrand = (value: string) =>
+    value.replaceAll("Digital Mitra Agency", "Tech Solutions");
+  const brandedTitle = rebrand(title);
+  const brandedDescription = rebrand(description);
+  return {
+    title: title.includes("Digital Mitra Agency")
+      ? { absolute: brandedTitle }
+      : brandedTitle,
+    description: brandedDescription,
+    alternates: { canonical: canonical || siteUrl + path },
+    robots: noindex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
+    openGraph: {
+      title: rebrand(ogTitle || title),
+      description: brandedDescription,
+      url: canonical || siteUrl + path,
+      siteName: "Tech Solutions",
+      type: "website",
+      images: [
+        {
+          url: ogImage || siteUrl + "/opengraph-image",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: rebrand(ogTitle || title),
+      description: brandedDescription,
+      images: [ogImage || siteUrl + "/opengraph-image"],
+    },
+  };
+};
 export async function pageMetadata(
   slug: string,
   title: string,

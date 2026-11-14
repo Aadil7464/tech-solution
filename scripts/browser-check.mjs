@@ -162,11 +162,11 @@ try {
     .filter({ hasText: email })
     .getByRole("button", { name: "Open", exact: true })
     .click();
-  await page.getByRole("combobox").selectOption("Qualified");
+  await page.getByRole("combobox").selectOption("In Progress");
   await page.getByLabel("Internal notes").fill("Browser test follow up");
   await page.getByRole("button", { name: "Save changes" }).click();
   await page.getByRole("status").filter({ hasText: "Changes saved" }).waitFor();
-  assert.equal((await Lead.findOne({ email })).status, "Qualified");
+  assert.equal((await Lead.findOne({ email })).status, "In Progress");
   await page.getByRole("button", { name: "Sign out" }).click();
   await page.waitForURL(base + "/admin/login");
   await page.goto(base + "/admin");

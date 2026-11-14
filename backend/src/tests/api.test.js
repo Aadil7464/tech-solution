@@ -14,8 +14,10 @@ import {
   Category,
   Page,
   Settings,
+  Activity,
 } from "../models/index.js";
 import { seed } from "../seed.js";
+import { serviceCatalog } from "../services/service-catalog.js";
 import { csvCell } from "../services/content.js";
 import sharp from "sharp";
 import ExcelJS from "exceljs";
@@ -124,7 +126,7 @@ test("page CMS persists sections, FAQ and SEO; drafts and unsafe URLs stay priva
   await Media.deleteOne({ _id: image._id });
   const settings = await Settings.findOne({ key: "site" }).lean();
   await save("put", "/api/v1/admin/settings", {
-    title: "Digital Mitra Agency",
+    title: "Tech Solutions",
     email: "digitalmitra@gmail.com",
     phone: "+91 90000 00000",
     whatsapp: "919000000000",
@@ -397,7 +399,7 @@ test("login, protected CRUD, publication, roles, notes, CSV and logout", async (
   }
   await write("delete", "/api/v1/admin/blogs/" + id).expect(204);
   await write("put", "/api/v1/admin/settings", {
-    title: "Digital Mitra Agency",
+    title: "Tech Solutions",
     email: "hello@example.com",
   }).expect(200);
   assert.equal(
@@ -493,8 +495,13 @@ test("lead filters, bulk status updates and XLSX exports work for administrators
 test("public services come from MongoDB and admin details stay private", async () => {
   const r = await supertest(app).get("/api/v1/services").expect(200);
   assert.equal(r.body.data.length, 12);
-  assert.equal(r.body.pagination.total, 17);
-  assert.equal(await Service.countDocuments(), 20);
+  assert.equal(r.body.pagination.total, serviceCatalog.length);
+  assert.equal(await Service.countDocuments(), serviceCatalog.length + 3);
+  const all = await supertest(app).get("/api/v1/services?limit=100").expect(200);
+  assert.deepEqual(
+    all.body.data.map((service) => service.slug).sort(),
+    serviceCatalog.map((service) => service.slug).sort(),
+  );
   assert.equal(r.body.data[0].passwordHash, undefined);
 });
 test("empty status filters show records and editors cannot perform admin-only actions", async () => {
@@ -519,7 +526,7 @@ test("empty status filters show records and editors cannot perform admin-only ac
     .get("/api/v1/admin/services?status=&search=")
     .expect(200);
   assert.equal(list.body.data.length, 12);
-  assert.equal(list.body.pagination.total, 20);
+  assert.equal(list.body.pagination.total, await Service.countDocuments());
   await editor.get("/api/v1/admin/settings").expect(403);
   await editor.get("/api/v1/admin/leads/export").expect(403);
   await post("post", "/api/v1/admin/testimonials", {
@@ -655,6 +662,7 @@ test("admin password reset is generic, single-use, and invalidates sessions", as
     passwordResetTransport: {
       sendMail: async (message) => {
         resetEmail = message;
+        return { accepted: [message.to], rejected: [] };
       },
     },
   });
@@ -671,14 +679,17 @@ test("admin password reset is generic, single-use, and invalidates sessions", as
     .post("/api/v1/auth/forgot-password")
     .set("Origin", origin)
     .set("x-csrf-token", token)
-    .send({ email: "admin@example.com" })
+    .send({ email: "  ADMIN@EXAMPLE.COM  " })
     .expect(200);
   const link = resetEmail.text.match(/https?:\/\/\S+token=([^\s]+)/)[0];
   const resetToken = new URL(link).searchParams.get("token");
   assert.ok(resetToken);
   const stored = await User.findOne({ email: "admin@example.com" }).select(
-    "+passwordResetHash",
+    "+passwordResetHash +passwordHash",
   );
+  assert.equal(stored.email, "admin@example.com");
+  assert.equal(bcrypt.getRounds(stored.passwordHash), 12);
+  assert.equal(await bcrypt.compare(password, stored.passwordHash), true);
   assert.equal(
     stored.passwordResetHash,
     crypto.createHash("sha256").update(resetToken).digest("hex"),
@@ -763,6 +774,17 @@ test("admin password reset is generic, single-use, and invalidates sessions", as
       confirmPassword: "NewPassword123!",
     })
     .expect(200);
+  const resetUser = await User.findById(stored._id).select(
+    "+passwordHash +passwordResetHash",
+  );
+  assert.equal(resetUser.email, stored.email);
+  assert.equal(bcrypt.getRounds(resetUser.passwordHash), 12);
+  assert.equal(await bcrypt.compare("NewPassword123!", resetUser.passwordHash), true);
+  assert.equal(await bcrypt.compare(password, resetUser.passwordHash), false);
+  assert.equal(resetUser.passwordResetHash, undefined);
+  assert.equal(resetUser.passwordResetExpires, undefined);
+  assert.equal(resetUser.sessionVersion, stored.sessionVersion + 1);
+  assert.ok(resetUser.passwordChangedAt instanceof Date);
   await client.get("/api/v1/admin/leads").expect(401);
   await client
     .post("/api/v1/auth/reset-password")
@@ -785,8 +807,32 @@ test("admin password reset is generic, single-use, and invalidates sessions", as
     .post("/api/v1/auth/login")
     .set("Origin", origin)
     .set("x-csrf-token", token)
-    .send({ email: "admin@example.com", password: "NewPassword123!" })
+    .send({ email: "  ADMIN@EXAMPLE.COM  ", password: "NewPassword123!" })
     .expect(200);
+});
+
+test("forgot password reports missing SMTP and provider failures without retaining undelivered tokens", async () => {
+  const requestReset = async (target, email) => {
+    const client = supertest.agent(target);
+    const token = (await client.get("/api/v1/auth/csrf")).body.data.token;
+    return client.post("/api/v1/auth/forgot-password")
+      .set("Origin", origin).set("x-csrf-token", token).send({ email });
+  };
+  const missing = createApp({ ...env, SMTP_HOST: "", SMTP_FROM: "" });
+  for (const email of ["admin@example.com", "missing@example.com"]) {
+    const response = await requestReset(missing, email);
+    assert.equal(response.status, 503);
+    assert.match(response.body.error.message, /configure SMTP/);
+  }
+  const failed = createApp({ ...env, SMTP_HOST: "smtp.example.test", SMTP_FROM: "admin@example.com" }, {
+    passwordResetTransport: { sendMail: async () => { throw new Error("Provider unavailable"); } },
+  });
+  const response = await requestReset(failed, "admin@example.com");
+  assert.equal(response.status, 503);
+  assert.match(response.body.error.message, /could not be sent/);
+  const user = await User.findOne({ email: "admin@example.com" }).select("+passwordResetHash");
+  assert.equal(user.passwordResetHash, undefined);
+  assert.equal(user.passwordResetExpires, undefined);
 });
 
 test("password reset links use the canonical frontend URL for localhost and LAN requests", async () => {
@@ -807,6 +853,7 @@ test("password reset links use the canonical frontend URL for localhost and LAN 
     passwordResetTransport: {
       sendMail: async (message) => {
         resetEmails.push(message);
+        return { accepted: [message.to], rejected: [] };
       },
     },
   });
@@ -1101,4 +1148,89 @@ test("account email changes reject duplicate admin email addresses", async () =>
     .send({ email: " duplicate@example.com ", password })
     .expect(409);
   await User.deleteOne({ email: "duplicate@example.com", role: "editor" });
+});
+
+test("password recovery never reports success for an unpersisted token or failed password update", async () => {
+  const current = await User.findOne({ role: "admin" }).select("+passwordHash");
+  let deliveries = 0;
+  const target = createApp({ ...env, SMTP_HOST: "smtp.example.test", SMTP_FROM: "admin@example.com" }, {
+    passwordResetTransport: { sendMail: async () => { deliveries++; } },
+  });
+  const client = supertest.agent(target);
+  const csrfToken = (await client.get("/api/v1/auth/csrf")).body.data.token;
+  const post = (path, body) => client.post(path).set("Origin", origin).set("x-csrf-token", csrfToken).send(body);
+  const original = User.updateOne;
+  User.updateOne = async () => ({ matchedCount: 0, modifiedCount: 0 });
+  try {
+    const response = await post("/api/v1/auth/forgot-password", { email: current.email }).expect(409);
+    assert.equal(response.body.data, undefined);
+    assert.equal(deliveries, 0);
+  } finally { User.updateOne = original; }
+  await post("/api/v1/auth/login", { email: { $ne: null }, password: { $ne: null } }).expect(422);
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  await User.updateOne({ _id: current._id }, { $set: {
+    passwordResetHash: crypto.createHash("sha256").update(resetToken).digest("hex"),
+    passwordResetExpires: new Date(Date.now() + 60000),
+  } });
+  await post("/api/v1/auth/reset-password", { token: resetToken, password, confirmPassword: password }).expect(422);
+  const fresh = crypto.randomBytes(24).toString("hex");
+  User.updateOne = async () => ({ matchedCount: 1, modifiedCount: 0 });
+  try {
+    const response = await post("/api/v1/auth/reset-password", { token: resetToken, password: fresh, confirmPassword: fresh }).expect(400);
+    assert.equal(response.body.data, undefined);
+  } finally { User.updateOne = original; }
+  const after = await User.findById(current._id).select("+passwordHash");
+  assert.equal(after.passwordHash, current.passwordHash);
+  await User.updateOne({ _id: current._id }, { $unset: { passwordResetHash: 1, passwordResetExpires: 1 } });
+});
+
+test("all content modules support validated CRUD, scheduling, search, pagination and immutable audit history", async () => {
+  const current = await User.findOne({ role: "admin" });
+  const client = supertest.agent(createApp(env));
+  const token = (await client.get("/api/v1/auth/csrf")).body.data.token;
+  const send = (method, path, body) => client[method](path).set("Origin", origin).set("x-csrf-token", token).send(body);
+  await send("post", "/api/v1/auth/login", { email: current.email, password }).expect(200);
+  const suffix = crypto.randomBytes(5).toString("hex");
+  for (const kind of ["blogs", "services", "portfolio", "testimonials", "pages", "categories"]) {
+    const slug = `module-${kind}-${suffix}`;
+    const base = { title: `Module ${kind} ${suffix}`, slug };
+    const body = kind === "categories" ? { ...base, description: "Module verification" } : {
+      ...base, status: "draft", content: '<p>Safe content</p><script>alert(1)</script>',
+      excerpt: "Verified module", approved: true, clientConsent: true,
+      seoTitle: `Module ${kind}`, metaDescription: "Module metadata", image: "/media/web-development.jpg", imageAlt: "Development workspace",
+    };
+    await send("post", `/api/v1/admin/${kind}`, { ...body, slug: "bad slug" }).expect(422);
+    const created = await send("post", `/api/v1/admin/${kind}`, body).expect(201);
+    const id = created.body.data._id;
+    await send("post", `/api/v1/admin/${kind}`, body).expect(409);
+    const listed = await client.get(`/api/v1/admin/${kind}?search=${suffix}&limit=1&page=1`).expect(200);
+    assert.equal(listed.body.data.length, 1);
+    assert.equal(listed.body.data[0]._id, id);
+    assert.equal(listed.body.pagination.limit, 1);
+    if (kind !== "categories") {
+      assert.ok(!created.body.data.content.includes("<script"));
+      await supertest(app).get(`/api/v1/${kind}/${slug}`).expect(404);
+      await send("put", `/api/v1/admin/${kind}/${id}`, { ...body, status: "scheduled", publishAt: new Date(Date.now() + 3600000).toISOString() }).expect(200);
+      await supertest(app).get(`/api/v1/${kind}/${slug}`).expect(404);
+      await send("put", `/api/v1/admin/${kind}/${id}`, { ...body, status: "scheduled", publishAt: new Date(Date.now() - 1000).toISOString() }).expect(200);
+      await supertest(app).get(`/api/v1/${kind}/${slug}`).expect(200);
+    }
+    await send("put", `/api/v1/admin/${kind}/${id}`, { ...body, title: `Updated ${base.title}`, ...(kind === "categories" ? {} : { status: "published", publishAt: null }) }).expect(200);
+    await send("delete", `/api/v1/admin/${kind}/${id}`).expect(204);
+    await send("put", `/api/v1/admin/${kind}/${id}`, body).expect(404);
+    const history = await Activity.find({ resource: kind, resourceId: id }).lean();
+    for (const action of ["create", "update", "delete"]) assert.ok(history.some((item) => item.action === action));
+  }
+  const dashboard = await client.get("/api/v1/admin/dashboard").expect(200);
+  const latestActivity = await Activity.find().sort({ createdAt: -1, _id: -1 }).limit(5).lean();
+  assert.deepEqual(dashboard.body.data.activity.map(row => row._id), latestActivity.map(row => String(row._id)));
+  const activity = await client.get("/api/v1/admin/activity?limit=1&page=1").expect(200);
+  assert.equal(activity.body.pagination.limit, 10);
+  assert.equal(activity.body.data.length, 10);
+  const nextActivity = await client.get("/api/v1/admin/activity?limit=100&page=2").expect(200);
+  assert.equal(nextActivity.body.pagination.limit, 10);
+  assert.equal(nextActivity.body.pagination.page, 2);
+  assert.ok(nextActivity.body.data.every(row => !activity.body.data.some(first => first._id === row._id)));
+  await send("post", "/api/v1/admin/activity", {}).expect(404);
+  await send("delete", `/api/v1/admin/activity/${activity.body.data[0]._id}`).expect(404);
 });

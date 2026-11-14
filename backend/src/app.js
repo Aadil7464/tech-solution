@@ -8,16 +8,23 @@ import mongoose from "mongoose";
 import { apiRouter } from "./routes/api.js";
 import { originGuard } from "./middleware/security.js";
 import { trustedFrontendOrigins } from "./config/env.js";
+import { trustedProxyCidrs } from "./config/proxy.js";
 export function createApp(env, dependencies = {}) {
   const resolvedEnv = {
     ...env,
     trustedFrontendOrigins: trustedFrontendOrigins(env),
   };
   const app = express();
+  app.set("trust proxy", trustedProxyCidrs(env.TRUSTED_PROXY_CIDRS));
   app.disable("x-powered-by");
   app.use(
     pinoHttp({
       level: resolvedEnv.NODE_ENV === "test" ? "silent" : "info",
+      serializers: {
+        req(req) {
+          return { id: req.id, method: req.method, url: req.url?.split("?")[0], remoteAddress: req.remoteAddress };
+        },
+      },
       redact: [
         "req.headers.cookie",
         "req.headers.authorization",
@@ -70,7 +77,7 @@ export function createApp(env, dependencies = {}) {
   );
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
-    req.log.error({ err }, "Request failed");
+    req.log.error({ errorType: err.name, errorCode: err.code, status: err.status }, "Request failed");
     const status =
       err.code === 11000
         ? 409

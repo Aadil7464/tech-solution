@@ -1,8 +1,25 @@
-# Digital Mitra Agency
+# Tech Solutions
 
-A local-first agency website with a Next.js App Router frontend, Express REST API and MongoDB persistence. There are no public default administrator credentials. Nothing is deployed.
+A PHP 8.2 website with a MySQL-backed content system, public pages, enquiries and an administrator area. Nothing is deployed.
 
-## Run locally
+## Run the PHP website
+
+See [PHP setup and MongoDB migration](docs/PHP_SETUP.md) for PHP/MySQL requirements, local setup, administrator provisioning, media storage and importing existing content. The PHP front controller is `index.php`; the public site does not require Node.js to run.
+
+Quick local start after configuring MySQL credentials:
+
+```powershell
+php php/setup.php
+php -S 127.0.0.1:8080 -t . php/router.php
+```
+
+Open **http://127.0.0.1:8080**. Admin sign-in: **/admin/login**.
+
+## Legacy Node.js / MongoDB implementation
+
+The original implementation and its documentation below are retained for rollback and data migration. They are not the runtime for the PHP website. Do not remove the local MongoDB data or old source until the MySQL import and website have been verified.
+
+### Run the legacy application
 
 Use Node.js 24 LTS and npm 11. Run commands from this project folder.
 
@@ -32,7 +49,7 @@ npm run dev
 
 Open **http://localhost:3000**. The API runs at **http://localhost:4000**; `/health` checks its database connection. `seed` adds 17 service offerings, editable website pages, three original agency articles and a category only when their slugs do not exist. It preserves edits. Portfolio and testimonials start empty.
 
-## Create your administrator
+### Create a legacy administrator
 
 Set `ADMIN_EMAIL`, `ADMIN_NAME` and `ADMIN_PASSWORD` in `backend/.env` to your own values, then run:
 
@@ -46,7 +63,7 @@ Administrators can reset their password from **http://localhost:3000/admin/forgo
 
 Admin accounts can manage all modules. Editors can manage articles, services and categories, read/update leads and upload media. Only administrators can delete content, export leads, approve client content or change settings. To provision an editor locally, set `ADMIN_ROLE=editor` with that person's explicit credentials before running bootstrap. The default role is `admin`. There is no public registration endpoint.
 
-## What to edit first
+### Legacy CMS notes
 
 - **Admin → Settings:** real business email, phone, address, social links and website defaults. Blank contact values display explicitly labelled placeholders.
 - **Admin → Services / Blogs:** edit content and SEO fields. Slugs are unique within each module. Content accepts a small sanitized HTML subset, not scripts or arbitrary embedded markup.
@@ -128,6 +145,6 @@ Use HTTPS in production with the frontend and proxied API on the same site. Do n
 
 Business contact details, approved client material, legal policy review, analytics consent configuration and hosting remain owner-supplied. No physical address, client endorsements, performance figures or search-ranking promises are fabricated.
 
-## Expanded Digital Mitra site
+## Expanded Tech Solutions site
 
 See [Admin and CMS usage](docs/ADMIN.md) for homepage sections, custom pages, FAQs, SEO, logo/WhatsApp settings and media replacement. See [Deployment and mail setup](docs/DEPLOYMENT.md) for hosting, durable media storage, SMTP notifications and verification commands. Existing MongoDB CMS and image storage have been retained. Contact enquiries now support phone and budget; SMTP notifications are disabled until credentials are configured.

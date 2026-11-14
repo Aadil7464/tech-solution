@@ -52,6 +52,36 @@ test("missing SMTP disables delivery and provider failures propagate for persist
   );
 });
 
+test("reset mail requires SMTP acceptance for the intended recipient", async () => {
+  for (const result of [undefined, { accepted: [], rejected: [] }, { accepted: ["different@example.com"], rejected: [] }]) {
+    await assert.rejects(sendPasswordResetEmail(
+      "digitalmitra786@gmail.com", "Admin", "fixture-token", { FRONTEND_URL: "http://localhost:3000", SMTP_FROM: "sender@example.com" },
+      { sendMail: async () => result },
+    ), /recipient rejected/);
+  }
+});
+
+test("reset delivery receipt pins the envelope and excludes reset tokens and SMTP secrets", async () => {
+  const recipient = "digitalmitra786@gmail.com";
+  const token = "fixture-secret-reset-token";
+  const env = { FRONTEND_URL: "http://localhost:3000", SMTP_FROM: "sender@example.com", SMTP_PASS: "fixture-smtp-secret" };
+  let sent;
+  const receipt = await sendPasswordResetEmail(recipient, "Admin", token, env, {
+    sendMail: async (message) => {
+      sent = message;
+      return { accepted: [recipient], messageId: "<trace@example.com>", response: `250 accepted ${token} ${env.SMTP_PASS}` };
+    },
+  });
+  assert.deepEqual(sent.envelope, { from: env.SMTP_FROM, to: [recipient] });
+  assert.deepEqual(sent.dsn, { ret: "headers", notify: ["failure", "delay"], recipient });
+  assert.equal(receipt.status, "provider_accepted");
+  assert.equal(receipt.inboxDelivery, "unconfirmed");
+  assert.equal(receipt.messageId, "<trace@example.com>");
+  assert.equal(receipt.resetPage, "http://localhost:3000/admin/reset-password");
+  assert.ok(!JSON.stringify(receipt).includes(token));
+  assert.ok(!JSON.stringify(receipt).includes(env.SMTP_PASS));
+});
+
 test("account links always use the canonical FRONTEND_URL", async () => {
   const env = {
     SMTP_FROM: "website@example.com",
@@ -75,6 +105,7 @@ test("account links always use the canonical FRONTEND_URL", async () => {
           resetMessages.push(
             JSON.parse((await transport.sendMail(message)).message),
           );
+          return { accepted: [message.to], rejected: [] };
         },
       },
     );
@@ -93,6 +124,8 @@ test("account links always use the canonical FRONTEND_URL", async () => {
     );
   }
   const [resetMessage] = resetMessages;
+  assert.equal(resetMessage.subject, "Reset Your Tech Solutions Admin Password");
+  assert.equal(resetMessage.from.name, "Tech Solutions");
   const [verificationMessage] = verificationMessages;
   assert.match(
     resetMessage.text,

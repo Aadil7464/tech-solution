@@ -42,7 +42,7 @@ export default function Header({
               ? "Clear, consistent visual communication."
               : "Reliable technology built around your business goals.";
   return (
-    <header className={"header" + (scrolled ? " scrolled" : "")}>
+    <header className={"header agency-header" + (scrolled ? " scrolled" : "")}>
       <div className="container nav">
         {" "}
         <Link href="/" aria-label="Go to homepage">

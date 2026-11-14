@@ -6,21 +6,24 @@ import { siteUrl } from "@/lib/seo";
 import { getSettings } from "@/lib/api";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
+  const rebrand = (value: string) =>
+    value.replaceAll("Digital Mitra Agency", "Tech Solutions");
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      default:
+      default: rebrand(
         settings.defaultSeoTitle ||
         settings.title + " — Your Partner in Digital Growth",
+      ),
       template: "%s | " + settings.title,
     },
-    description:
+    description: rebrand(
       settings.defaultSeoDescription ||
       settings.description ||
       "Purposeful digital marketing, search, paid media and website development.",
+    ),
     icons: {
       icon: [
-        { url: "/logo/favicon.svg", type: "image/svg+xml", sizes: "any" },
         { url: "/favicon.ico", sizes: "32x32" },
         { url: "/logo/icon-192.png", type: "image/png", sizes: "192x192" },
         { url: "/logo/icon-512.png", type: "image/png", sizes: "512x512" },

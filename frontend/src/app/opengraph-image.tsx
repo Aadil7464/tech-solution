@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 export const runtime = "nodejs";
-export const alt = "Digital Mitra Agency — Your Partner in Digital Growth";
+export const alt = "Tech Solutions — Your Partner in Digital Growth";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default function Image() {
@@ -18,7 +18,7 @@ export default function Image() {
       }}
     >
       <div style={{ fontSize: 23, color: "#92baff", marginBottom: 45 }}>
-        DIGITAL MITRA AGENCY
+        TECH SOLUTIONS
       </div>
       <div
         style={{

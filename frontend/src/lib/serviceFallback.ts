@@ -103,6 +103,8 @@ const services: [string, string, string, string][] = [
     "creative",
     "Clear, consistent visual communication for brands, campaigns and digital experiences.",
   ],
+  ["Google Business Profile (GMB)", "google-business-profile", "marketing", "Accurate profile setup and improvements for eligible local businesses."],
+  ["Branding", "branding", "creative", "Brand positioning, visual identity and guidelines for consistent communication."],
 ];
 
 export const serviceFallback = services.map(
@@ -112,10 +114,13 @@ export const serviceFallback = services.map(
     slug,
     category,
     excerpt,
-    content: "",
+    content: `<h2>${title}</h2><p>${excerpt}</p><p>Contact our team to discuss your goals, current setup and the right scope for this service.</p>`,
     createdAt: "",
     updatedAt: "",
     status: "published",
     order: index,
   }),
 );
+
+export const getServiceFallback = (slug: string) =>
+  serviceFallback.find((service) => service.slug === slug);
