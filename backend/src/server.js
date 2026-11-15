@@ -19,7 +19,19 @@ try {
         process.exit(0);
       }),
     );
+// } catch (err) {
+//   log.fatal({ errorType: err.name, errorCode: err.code }, "API failed to start");
+//   process.exit(1);
+// }
 } catch (err) {
-  log.fatal({ errorType: err.name, errorCode: err.code }, "API failed to start");
+  log.fatal(
+    {
+      errorType: err.name,
+      errorCode: err.code,
+      errorMessage: err.message,
+      causeMessage: err.cause?.message,
+    },
+    "API failed to start",
+  );
   process.exit(1);
 }
