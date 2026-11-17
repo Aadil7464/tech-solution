@@ -5,6 +5,8 @@ require_once __DIR__ . '/config.php';
 start_app_session();
 
 const APP_NAME = 'Tech Solutions';
+const PUBLIC_EMAIL = 'techsolutions286@gmail.com';
+const PUBLIC_LOGO = '/frontend/public/tech-solutions-logo.png';
 const CONTENT_KINDS = ['blogs', 'services', 'portfolio', 'testimonials', 'pages', 'categories'];
 const LEAD_STATUSES = ['New', 'Pending', 'In Progress', 'Completed', 'Cancelled'];
 
@@ -76,12 +78,32 @@ function setting_data(): array
     $stmt = db()->prepare('SELECT data FROM settings WHERE setting_key = ?');
     $stmt->execute(['site']);
     $row = $stmt->fetch();
-    return $row ? json_array($row['data']) : [
+    $settings = $row ? json_array($row['data']) : [];
+    if (in_array($settings['email'] ?? '', ['', 'digitalmitra786@gmail.com'], true)) {
+        $settings['email'] = PUBLIC_EMAIL;
+    }
+    foreach (['logo', 'logoDark'] as $key) {
+        if (in_array($settings[$key] ?? '', [
+            '/frontend/public/tech-solutions-logo.jpg',
+            '/frontend/public/logo/tech-solution-agency.svg',
+            '/frontend/public/logo/tech-solution-agency-dark.svg',
+            '/frontend/public/logo/digital-mitra-agency.svg',
+            '/frontend/public/logo/digital-mitra-agency-dark.svg',
+            '/logo/tech-solution-agency.svg',
+            '/logo/tech-solution-agency-dark.svg',
+            '/logo/digital-mitra-agency.svg',
+            '/logo/digital-mitra-agency-dark.svg',
+        ], true)) {
+            $settings[$key] = PUBLIC_LOGO;
+        }
+    }
+    return array_merge([
         'title' => APP_NAME,
-        'email' => 'digitalmitra786@gmail.com',
-        'logo' => '/frontend/public/logo/tech-solution-agency.svg',
+        'email' => PUBLIC_EMAIL,
+        'logo' => PUBLIC_LOGO,
+        'logoDark' => PUBLIC_LOGO,
         'description' => 'Website development, mobile apps, SEO and performance marketing for your next chapter.',
-    ];
+    ], $settings);
 }
 
 function request_path(): string
@@ -329,7 +351,7 @@ function render_flash(): string
 
 function header_html(array $settings, string $active = ''): string
 {
-    $logo = asset_path((string) ($settings['logo'] ?? ''), '/frontend/public/logo/tech-solution-agency.svg');
+    $logo = asset_path((string) ($settings['logo'] ?? ''), PUBLIC_LOGO);
     $services = list_content('services', 50)['items'];
     $links = [['Home', '/'], ['About', '/about'], ['Services', '/services'], ['Portfolio', '/portfolio'], ['Blog', '/blog'], ['Contact', '/contact']];
     $html = '<a class="skip-link" href="#main">Skip to content</a><header class="header agency-header"><div class="container nav"><a href="/" aria-label="Tech Solutions home"><img class="header-logo" src="' . e($logo) . '" alt="' . e($settings['title'] ?? APP_NAME) . '" width="230" height="70"></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu <span aria-hidden="true">☰</span></button><nav id="main-nav" class="nav-links" aria-label="Main navigation">';
@@ -343,7 +365,7 @@ function header_html(array $settings, string $active = ''): string
 
 function footer_html(array $settings): string
 {
-    $logo = asset_path((string) ($settings['logoDark'] ?? $settings['logo'] ?? ''), '/frontend/public/logo/tech-solution-agency-dark.svg');
+    $logo = asset_path((string) ($settings['logoDark'] ?? $settings['logo'] ?? ''), PUBLIC_LOGO);
     $email = $settings['email'] ?? '';
     $html = '<footer class="agency-footer"><div class="container"><div class="agency-footer-grid"><div><a href="/" aria-label="Tech Solutions homepage"><img class="agency-footer-logo" src="' . e($logo) . '" alt="' . e($settings['title'] ?? APP_NAME) . '" width="240" height="76"></a><p>' . e($settings['footerText'] ?? 'We help brands grow online with thoughtful digital solutions.') . '</p></div><div><h3>Quick Links</h3><nav aria-label="Footer quick links"><a href="/">Home</a><a href="/about">About Us</a><a href="/services">Services</a><a href="/portfolio">Portfolio</a><a href="/blog">Blog</a><a href="/contact">Contact</a></nav></div><div><h3>Our Services</h3><nav aria-label="Footer services">';
     foreach (array_slice(list_content('services', 6)['items'], 0, 6) as $service) {
@@ -713,7 +735,7 @@ function render_login(): never
     if (current_user()) {
         redirect_to('/admin');
     }
-    $body = '<section class="login-page"><form method="post" action="/admin/login" class="login-form"><img src="/frontend/public/logo/tech-solution-agency.svg" alt="Tech Solutions" width="220"><h1>Administrator sign in</h1>' . render_flash() . csrf_input() . '<label>Email address<input type="email" name="email" required maxlength="254" autocomplete="username"></label><label>Password<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button class="button" type="submit">Sign in</button></form></section>';
+    $body = '<section class="login-page"><form method="post" action="/admin/login" class="login-form"><img src="' . PUBLIC_LOGO . '" alt="Tech Solutions" width="220"><h1>Administrator sign in</h1>' . render_flash() . csrf_input() . '<label>Email address<input type="email" name="email" required maxlength="254" autocomplete="username"></label><label>Password<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button class="button" type="submit">Sign in</button></form></section>';
     page_html('Admin login', 'Sign in to manage website content.', $body, '/admin/login', true);
 }
 

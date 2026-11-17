@@ -168,7 +168,7 @@ export const Settings = mongoose.model(
       key: { type: String, unique: true, default: "site" },
       title: { type: String, default: "Tech Solutions" },
       description: String,
-      email: { type: String, default: "digitalmitra786@gmail.com" },
+      email: { type: String, default: "techsolutions286@gmail.com" },
       phone: String,
       whatsapp: String,
       logo: String,

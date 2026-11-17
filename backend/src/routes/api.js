@@ -345,7 +345,7 @@ export function apiRouter(env, passwordResetTransport) {
     res.json({
       data: data || {
         title: "Tech Solutions",
-        email: "digitalmitra786@gmail.com",
+        email: "techsolutions286@gmail.com",
       },
     });
   });
@@ -862,7 +862,7 @@ export function apiRouter(env, passwordResetTransport) {
     res.json({
       data: (await Settings.findOne({ key: "site" }).lean()) || {
         title: "Tech Solutions",
-        email: "digitalmitra786@gmail.com",
+        email: "techsolutions286@gmail.com",
       },
     }),
   );

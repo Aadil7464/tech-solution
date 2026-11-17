@@ -3,6 +3,15 @@ import { cache } from "react";
 import type { Content, ListResult, SiteSettings } from "@/types";
 import { getServiceFallback, serviceFallback } from "./serviceFallback";
 const base = process.env.API_INTERNAL_URL || "http://127.0.0.1:4000";
+const defaultLogo = "/tech-solutions-logo.png";
+const previousLogos = [
+  "/tech-solutions-logo.jpg",
+  "/frontend/public/tech-solutions-logo.jpg",
+  "/logo/tech-solution-agency.svg",
+  "/logo/tech-solution-agency-dark.svg",
+  "/logo/digital-mitra-agency.svg",
+  "/logo/digital-mitra-agency-dark.svg",
+];
 const rebrand = (value: string | undefined) =>
   (value || "").replaceAll("Digital Mitra Agency", "Tech Solutions");
 function rebrandContent(content: Content): Content {
@@ -103,16 +112,19 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
       ...data,
       title: "Tech Solutions",
       logo:
-        data?.logo && !data.logo.toLowerCase().includes("digital-mitra")
+        data?.logo && !previousLogos.includes(data.logo)
           ? data.logo
-          : "/logo/tech-solution-agency.svg",
-      email: data?.email || "digitalmitra786@gmail.com",
+          : defaultLogo,
+      email:
+        !data?.email || data.email === "digitalmitra786@gmail.com"
+          ? "techsolutions286@gmail.com"
+          : data.email,
     };
   } catch {
     return {
       title: "Tech Solutions",
-      logo: "/logo/tech-solution-agency.svg",
-      email: "digitalmitra786@gmail.com",
+      logo: defaultLogo,
+      email: "techsolutions286@gmail.com",
     };
   }
 });

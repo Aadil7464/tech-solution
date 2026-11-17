@@ -20,11 +20,11 @@ foreach (array_filter(array_map('trim', explode(';', $schema))) as $statement) {
 $settings = [
     'title' => 'Tech Solutions',
     'description' => 'Website development, mobile apps, SEO and performance marketing for your next chapter.',
-    'email' => 'digitalmitra786@gmail.com',
+    'email' => 'techsolutions286@gmail.com',
     'phone' => '',
     'whatsapp' => '',
-    'logo' => '/frontend/public/logo/tech-solution-agency.svg',
-    'logoDark' => '/frontend/public/logo/tech-solution-agency-dark.svg',
+    'logo' => '/frontend/public/tech-solutions-logo.png',
+    'logoDark' => '/frontend/public/tech-solutions-logo.png',
     'footerText' => 'We help brands grow online with thoughtful digital solutions.',
     'address' => '',
     'socialLinks' => [],
@@ -96,7 +96,7 @@ foreach ($pages as [$slug, $title, $excerpt, $seoTitle]) {
     $payload = ['seoTitle' => $seoTitle, 'noindex' => in_array($slug, ['privacy-policy', 'terms-and-conditions'], true), '_phpSeeded' => true];
     $body = match ($slug) {
         'about' => '<h2>Your digital partner</h2><p>We help businesses connect the way they look, the tools they use and the way customers find them. We start with questions about your audience, operations and goals before discussing a solution.</p><h2>Clarity at every step</h2><p>We agree a practical scope, make responsibilities visible and explain progress in plain language.</p><h2>Connected by design</h2><p>A website, a mobile application and an advertising campaign should support the same business purpose.</p>',
-        'privacy-policy' => '<p>Business policy template — complete the operating entity, jurisdiction and retention details before publication.</p><h2>Information you share</h2><p>When you enquire, we receive the details you submit so the team can respond to your project request.</p><h2>How information is used</h2><p>We use enquiry information to respond and manage the conversation. We do not sell enquiry details.</p><h2>Your requests</h2><p>Email digitalmitra786@gmail.com to ask about access, correction or deletion.</p>',
+        'privacy-policy' => '<p>Business policy template — complete the operating entity, jurisdiction and retention details before publication.</p><h2>Information you share</h2><p>When you enquire, we receive the details you submit so the team can respond to your project request.</p><h2>How information is used</h2><p>We use enquiry information to respond and manage the conversation. We do not sell enquiry details.</p><h2>Your requests</h2><p>Email techsolutions286@gmail.com to ask about access, correction or deletion.</p>',
         'terms-and-conditions' => '<p>Business terms template — complete the legal entity and applicable terms with appropriate review before publication.</p><h2>Website information</h2><p>Content explains our services and is not a binding proposal. Scope, timing, fees and deliverables are confirmed in a separate written agreement.</p><h2>Responsible use</h2><p>Do not misuse this website, attempt unauthorised access or submit unlawful material.</p>',
         default => '',
     };

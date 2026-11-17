@@ -23,7 +23,7 @@ export default async function Terms() {
           <div dangerouslySetInnerHTML={{ __html: data.content }} />
         ) : (
           <p>
-            Terms are temporarily unavailable. Email digitalmitra786@gmail.com with
+            Terms are temporarily unavailable. Email techsolutions286@gmail.com with
             questions.
           </p>
         )}

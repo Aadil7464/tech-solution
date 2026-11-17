@@ -150,7 +150,7 @@ export const pageDefaults = [
       "Share your goals, your questions and what you have in mind. We will use your brief to explore a practical scope.",
     seoTitle: "Contact Tech Solutions",
     metaDescription:
-      "Discuss your website, application or marketing project with Tech Solutions. Email digitalmitra786@gmail.com or send an enquiry.",
+      "Discuss your website, application or marketing project with Tech Solutions. Email techsolutions286@gmail.com or send an enquiry.",
   },
   ...[
     [
@@ -181,7 +181,7 @@ export const pageDefaults = [
     excerpt: "How we handle website enquiries and personal information.",
     noindex: true,
     content:
-      "<p>Business policy template — complete the operating entity, jurisdiction, retention periods and any analytics details before publication.</p><h2>Information you share</h2><p>When you enquire, we receive your name, email, phone number if supplied, service interest, budget and message. Campaign and referring-page details may accompany the enquiry.</p><h2>How information is used</h2><p>We use enquiry information to respond, assess your requirements and manage the conversation. Access is limited to authorised team members. Enquiries are stored in our database and may trigger an email notification.</p><h2>Storage and service providers</h2><p>Contact us to confirm the hosting location, applicable processors and retention period for your information. We do not sell enquiry details.</p><h2>Your requests</h2><p>Email digitalmitra786@gmail.com to ask about access, correction or deletion. Applicable rights depend on your jurisdiction and legal obligations.</p><h2>Cookies and analytics</h2><p>Essential cookies protect administrator sessions. Analytics is disabled unless configured. Describe the actual analytics and consent setup here before enabling tracking.</p>",
+      "<p>Business policy template — complete the operating entity, jurisdiction, retention periods and any analytics details before publication.</p><h2>Information you share</h2><p>When you enquire, we receive your name, email, phone number if supplied, service interest, budget and message. Campaign and referring-page details may accompany the enquiry.</p><h2>How information is used</h2><p>We use enquiry information to respond, assess your requirements and manage the conversation. Access is limited to authorised team members. Enquiries are stored in our database and may trigger an email notification.</p><h2>Storage and service providers</h2><p>Contact us to confirm the hosting location, applicable processors and retention period for your information. We do not sell enquiry details.</p><h2>Your requests</h2><p>Email techsolutions286@gmail.com to ask about access, correction or deletion. Applicable rights depend on your jurisdiction and legal obligations.</p><h2>Cookies and analytics</h2><p>Essential cookies protect administrator sessions. Analytics is disabled unless configured. Describe the actual analytics and consent setup here before enabling tracking.</p>",
   },
   {
     title: "Terms & Conditions",
@@ -189,7 +189,7 @@ export const pageDefaults = [
     excerpt: "Website use and the starting point for working together.",
     noindex: true,
     content:
-      "<p>Business terms template — complete the legal entity, jurisdiction and applicable terms with appropriate review before publication.</p><h2>Website information</h2><p>Content explains our services and is not a binding proposal. Scope, timing, fees and deliverables are confirmed in a separate written agreement.</p><h2>Project agreements</h2><p>Ownership, licensing, payment milestones, support and third-party costs are defined before work begins. Submitting an enquiry does not create a service contract.</p><h2>Responsible use</h2><p>Do not misuse this website, attempt unauthorised access or submit unlawful material. We may restrict abusive submissions.</p><h2>Third-party services and outcomes</h2><p>Platforms and search engines control their own services. We do not guarantee rankings, advertising outcomes or app-store decisions.</p><h2>Questions</h2><p>Email digitalmitra786@gmail.com for clarification about the website or a project proposal.</p>",
+      "<p>Business terms template — complete the legal entity, jurisdiction and applicable terms with appropriate review before publication.</p><h2>Website information</h2><p>Content explains our services and is not a binding proposal. Scope, timing, fees and deliverables are confirmed in a separate written agreement.</p><h2>Project agreements</h2><p>Ownership, licensing, payment milestones, support and third-party costs are defined before work begins. Submitting an enquiry does not create a service contract.</p><h2>Responsible use</h2><p>Do not misuse this website, attempt unauthorised access or submit unlawful material. We may restrict abusive submissions.</p><h2>Third-party services and outcomes</h2><p>Platforms and search engines control their own services. We do not guarantee rankings, advertising outcomes or app-store decisions.</p><h2>Questions</h2><p>Email techsolutions286@gmail.com for clarification about the website or a project proposal.</p>",
   },
 ].map((page) => ({
   ...page,

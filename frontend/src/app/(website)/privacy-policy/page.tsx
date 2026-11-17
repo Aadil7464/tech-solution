@@ -24,7 +24,7 @@ export default async function Privacy() {
         ) : (
           <p>
             Policy content is temporarily unavailable. Email
-            digitalmitra786@gmail.com for privacy enquiries.
+            techsolutions286@gmail.com for privacy enquiries.
           </p>
         )}
       </article>

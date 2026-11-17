@@ -24,7 +24,7 @@ const links=await page.locator('.agency-header a,.agency-footer a,.growth-banner
 const routes=[...new Set(links.filter(h=>h.startsWith('/')))];
 const checked=[];for(const route of routes){const response=await page.request.get('http://localhost:3000'+route);assert.equal(response.status(),200,route);checked.push({route,status:response.status()});}
 const phones=links.filter(h=>h.startsWith('tel:'));assert.deepEqual(phones,['tel:+917464891312','tel:+918941024813','tel:+916397554750']);
-assert.ok(links.includes('mailto:digitalmitra786@gmail.com'));
+assert.ok(links.includes('mailto:techsolutions286@gmail.com'));
 assert.deepEqual(errors,[]);
 await fs.writeFile('.test-data/shell/verification.json',JSON.stringify({results,checked,phones,errors},null,2));console.log(JSON.stringify({results,checked,phones,errors}));
 }finally{await browser.close();}

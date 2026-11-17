@@ -8,7 +8,7 @@ export const generateMetadata = () =>
   pageMetadata(
     "contact",
     "Contact Tech Solutions",
-    "Discuss your website, mobile application or marketing project. Email digitalmitra786@gmail.com or send an enquiry.",
+    "Discuss your website, mobile application or marketing project. Email techsolutions286@gmail.com or send an enquiry.",
     "/contact",
   );
 export default async function Contact() {

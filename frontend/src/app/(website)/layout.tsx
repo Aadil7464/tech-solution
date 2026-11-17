@@ -15,7 +15,7 @@ export default async function WebsiteLayout({
     getSettings(),
     getList("services", "limit=50"),
   ]);
-  const logo = s.logo || "/logo/tech-solution-agency.svg";
+  const logo = s.logo || "/tech-solutions-logo.png";
   const whatsappMessage =
     "Hello Tech Solutions, I would like to know more about your services.";
   return (
